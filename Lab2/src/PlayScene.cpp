@@ -158,7 +158,9 @@ void PlayScene::Start()
 	AddChild(m_pTarget);
 
 	m_pStarship = new Starship();
+	m_pStarship->SetTargetPosition(m_pTarget->GetTransform()->position);
 	AddChild(m_pStarship);
+	m_pStarship->SetEnabled(false);
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
 }
@@ -209,8 +211,35 @@ void PlayScene::GUI_Function()
 	if (ImGui::Button("resrt ship position")) {
 
 		m_pStarship->Reset();
-		shipPosition[0] = m_pStarship->GetTransform()->position.x;
-		shipPosition[1] = m_pStarship->GetTransform()->position.y;
+		
 	}
+
+	ImGui::Separator();
+	static bool toggle_seek = m_pStarship->IsEnabled();
+	if (ImGui::Checkbox("toggle seek", &toggle_seek)) {
+		m_pStarship->SetEnabled(toggle_seek);
+	}
+
+	if (ImGui::Button("reset seek")) {
+		m_pStarship->Reset();
+		m_pStarship->GetRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+			m_pStarship->GetRigidBody()->acceleration= glm::vec2(0.0f, 0.0f);
+			m_pStarship->GetRigidBody()->isColliding = false;
+			m_pStarship->setMaxSpeed(20.0f);
+			m_pStarship->setTurnRate(5.0f);
+			m_pStarship->setAccelerationRate(2.0f);
+			m_pStarship->SetCurrentHeading(0.0f);
+			m_pStarship->SetEnabled(false);
+			toggle_seek = false;
+
+	}
+
+	ImGui::Separator();
+
+	float max_speed = m_pStarship->getMaxSpeed();
+	if (ImGui::SliderFloat("max speed", &max_speed, 0.0f, 100.0f)) {
+		m_pStarship->setMaxSpeed(max_speed);
+	}
+
 	ImGui::End();
 }
