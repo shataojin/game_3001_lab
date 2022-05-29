@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "Target.h"
+#include "Starship.h"
 
 class PlayScene : public Scene
 {
@@ -23,6 +24,7 @@ private:
 	std::string m_guiTitle;
 	
 	Target* m_pTarget;
+	Starship* m_pStarship;
 	// Input Control
 	int m_pCurrentInputType{};
 	void GetPlayerInput();

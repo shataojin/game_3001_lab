@@ -157,6 +157,8 @@ void PlayScene::Start()
 	m_pTarget = new Target(); // instantiates the target GameObject and allocates memory on the Heap
 	AddChild(m_pTarget);
 
+	m_pStarship = new Starship();
+	AddChild(m_pStarship);
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
 }
@@ -184,9 +186,31 @@ void PlayScene::GUI_Function()
 		m_pTarget->GetTransform()->position.y = targetPosition[1];
 	}
 
+
+
 	if (ImGui::Button("resrt target position")) {
 
 		m_pTarget->Reset();
+		targetPosition[0] = m_pTarget->GetTransform()->position.x;
+		targetPosition[1] = m_pTarget->GetTransform()->position.y;
+	}
+
+
+	ImGui::Separator();
+	static float shipPosition[2] = { m_pStarship->GetTransform()->position.x, m_pTarget->GetTransform()->position.y };
+	if (ImGui::SliderFloat2("ship Position", shipPosition, 0.0f, 800.0f))
+	{
+		m_pStarship->GetTransform()->position.x = shipPosition[0];
+		m_pStarship->GetTransform()->position.y = shipPosition[1];
+	}
+
+
+
+	if (ImGui::Button("resrt ship position")) {
+
+		m_pStarship->Reset();
+		shipPosition[0] = m_pStarship->GetTransform()->position.x;
+		shipPosition[1] = m_pStarship->GetTransform()->position.y;
 	}
 	ImGui::End();
 }
