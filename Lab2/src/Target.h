@@ -7,17 +7,17 @@
 class Target final : public DisplayObject {
 public:
 	Target();
-	~Target();
+	~Target() override;
 
 	// Inherited via GameObject
-	virtual void draw() override;
-	virtual void update() override;
-	virtual void clean() override;
+	virtual void Draw() override;
+	virtual void Update() override;
+	virtual void Clean() override;
 
 private:
-	void m_move();
-	void m_checkBounds();
-	void m_reset();
+	void Move();
+	void CheckBounds();
+	void Reset();
 };
 
 

@@ -24,7 +24,17 @@ private:
 	// IMGUI Function
 	void GUI_Function();
 	std::string m_guiTitle;
+	
 	glm::vec2 m_mousePosition;
+
+	Plane* m_pPlaneSprite{};
+	Player* m_pPlayer{};
+	bool m_playerFacingRight{};
+
+	// UI Items
+	Button* m_pBackButton{};
+	Button* m_pNextButton{};
+	Label* m_pInstructionsLabel{};
 
 	// Input Control
 	int m_pCurrentInputType{};
