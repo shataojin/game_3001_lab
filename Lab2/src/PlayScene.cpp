@@ -177,22 +177,11 @@ void PlayScene::GUI_Function()
 	ImGui::RadioButton("Both", &m_pCurrentInputType, static_cast<int>(InputType::ALL));
 
 	ImGui::Separator();
-
-	if(ImGui::Button("My Button"))
+	static float position[2] = { m_pTarget->getTransform()->position.x, m_pTarget->getTransform()->position.y };
+	if (ImGui::SliderFloat2("Target Position", position, 0.0f, 800.0f))
 	{
-		std::cout << "My Button Pressed" << std::endl;
+		m_pTarget->getTransform()->position = glm::vec2(position[0], position[1]);
+		//m_pSpaceShip->setTargetPosition(m_pTarget->getTransform()->position);
 	}
-
-	ImGui::Separator();
-
-	static float float3[3] = { 0.0f, 1.0f, 1.5f };
-	if(ImGui::SliderFloat3("My Slider", float3, 0.0f, 2.0f))
-	{
-		std::cout << float3[0] << std::endl;
-		std::cout << float3[1] << std::endl;
-		std::cout << float3[2] << std::endl;
-		std::cout << "---------------------------\n";
-	}
-	
 	ImGui::End();
 }
