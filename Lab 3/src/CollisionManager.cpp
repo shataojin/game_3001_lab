@@ -84,8 +84,14 @@ bool CollisionManager::AABBCheck(GameObject* object1, GameObject* object2)
 		}
 		return false;
 	}
-	object2->GetRigidBody()->isColliding = false;
-	return false;
+
+	else
+	{
+		object2->GetRigidBody()->isColliding = false;
+		std::cout << "no collision" << std::endl;
+		return false;
+	}
+	
 
 }
 

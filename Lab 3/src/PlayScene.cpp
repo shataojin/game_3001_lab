@@ -26,6 +26,16 @@ void PlayScene::Draw()
 void PlayScene::Update()
 {
 	UpdateDisplayList();
+	if (m_pStarship->IsEnabled()) 
+	{
+		CollisionManager::AABBCheck(m_pObstacle, m_pStarship);
+		if(!m_pStarship->GetRigidBody()->isColliding)
+{
+			CollisionManager::AABBCheck(m_pTarget, m_pStarship);
+}
+	
+		//dowhiskercollision();
+	}
 }
 
 void PlayScene::Clean()
@@ -163,7 +173,12 @@ void PlayScene::Start()
 	AddChild(m_pStarship);
 	m_pStarship->SetEnabled(false);
 
-	/* DO NOT REMOVE */
+	m_pObstacle = new Obstacle();
+	AddChild(m_pObstacle);
+	//load sounds
+	SoundManager::Instance().Load("..Assets / audio / yay.ogg", "yay", SoundType::SOUND_SFX);
+	SoundManager::Instance().Load("..Assets / audio / thunder.ogg", "boom", SoundType::SOUND_SFX);
+		/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
 }
 

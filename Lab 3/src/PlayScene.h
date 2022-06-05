@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Target.h"
 #include "Starship.h"
+#include"Obstacle.h"
 
 class PlayScene : public Scene
 {
@@ -26,7 +27,7 @@ private:
 	// Lab 2 Game Objects
 	Target* m_pTarget;
 	Starship* m_pStarship;
-
+	Obstacle* m_pObstacle;
 	// Input Control
 	int m_pCurrentInputType{};
 	void GetPlayerInput();
