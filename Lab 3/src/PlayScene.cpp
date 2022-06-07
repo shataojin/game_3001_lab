@@ -20,6 +20,15 @@ PlayScene::~PlayScene()
 void PlayScene::Draw()
 {
 	DrawDisplayList();
+
+	if(m_pStarship->IsEnabled()) {
+		Util::DrawLine(m_pStarship->GetTransform()->position,
+			m_pStarship->GetLeftLOSEndPoint(), m_pStarship->GetLineColor(0));
+		Util::DrawLine(m_pStarship->GetTransform()->position,
+			m_pStarship->GetMiddleLOSEndPoint(), m_pStarship->GetLineColor(1));
+		Util::DrawLine(m_pStarship->GetTransform()->position,
+			m_pStarship->GetRightLOSEndPoint(), m_pStarship->GetLineColor(2));
+	}
 	SDL_SetRenderDrawColor(Renderer::Instance().GetRenderer(), 255, 255, 255, 255);
 }
 
@@ -28,10 +37,11 @@ void PlayScene::Update()
 	UpdateDisplayList();
 	if (m_pStarship->IsEnabled()) 
 	{
+		DoWhiskerCollision();
 		CollisionManager::AABBCheck(m_pObstacle, m_pStarship);
 		if(!m_pStarship->GetRigidBody()->isColliding)
 {
-			CollisionManager::AABBCheck(m_pTarget, m_pStarship);
+			CollisionManager::CircleAABBCheck(m_pTarget, m_pStarship);
 }
 	
 		//dowhiskercollision();
@@ -276,4 +286,37 @@ void PlayScene::GUI_Function()
 	}
 
 	ImGui::End();
+}
+
+
+void PlayScene::DoWhiskerCollision()
+{
+	SDL_Rect box =
+	{
+		(int)(m_pObstacle->GetTransform()->position.x - m_pObstacle->GetWidth() * 0.5f),
+		(int)(m_pObstacle->GetTransform()->position.y - m_pObstacle->GetHeight() * 0.5f),
+		(int)m_pObstacle->GetWidth(),(int)m_pObstacle->GetHeight()
+	};
+
+	SDL_Point ship_origin = { (int)m_pStarship->GetTransform()->position.x ,m_pStarship->GetTransform()->position.y };
+	SDL_Point left = { (int)m_pStarship->GetLeftLOSEndPoint().x ,(int)m_pStarship->GetLeftLOSEndPoint().y };
+	SDL_Point middle = { (int)m_pStarship->GetMiddleLOSEndPoint().x ,(int)m_pStarship->GetMiddleLOSEndPoint().y };
+	SDL_Point right = { (int)m_pStarship->GetRightLOSEndPoint().x ,(int)m_pStarship->GetRightLOSEndPoint().y };
+
+	bool collisions[3] = { 0,0,0 };
+
+	SDL_Point
+	ship = ship_origin;
+	collisions[0] = SDL_IntersectRectAndLine(&box, &ship.x, &ship.y, &left.x, &left.y);
+	ship = ship_origin;
+	collisions[1] = SDL_IntersectRectAndLine(&box, &ship.x, &ship.y, &middle.x, &middle.y);
+	ship = ship_origin;
+	collisions[2] = SDL_IntersectRectAndLine(&box, &ship.x, &ship.y, &right.x, &right.y);
+
+	for (unsigned i = 0; i < 3; i++)
+	{
+		m_pStarship->GetCollisionWhiskers()[i] = collisions[i];
+		m_pStarship->SetLineColor(i, (collisions[i] ? glm::vec4(1, 0, 0, 1) : glm::vec4(0, 1, 0, 1)));
+
+	}
 }

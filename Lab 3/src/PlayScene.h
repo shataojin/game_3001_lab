@@ -32,6 +32,7 @@ private:
 	int m_pCurrentInputType{};
 	void GetPlayerInput();
 	void GetKeyboardInput();
+	void DoWhiskerCollision();
 };
 
 #endif /* defined (__PLAY_SCENE__) */

@@ -17,7 +17,8 @@ Starship::Starship() : m_startPos( glm::vec2(400.0f, 400.0f) ),
 	GetRigidBody()->acceleration = glm::vec2(0, 0);
 	GetRigidBody()->isColliding = false;
 	SetCurrentHeading(0.0f); // current facing angle
-
+	SetLOSDistance(300.0f);
+	SetWhiskerAngle(45.0f);
 	SetType(GameObjectType::SPACE_SHIP);
 }
 
@@ -94,12 +95,33 @@ void Starship::Seek()
 
 void Starship::LookWhereIAmGoing(glm::vec2 target_direction)
 {
-	const auto target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
+	//const auto target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
 
-	if (abs(target_rotation) > m_turnRate) // Do I still need to rotate?
+	//if (abs(target_rotation) > m_turnRate) // Do I still need to rotate?
+	//{
+	//	SetCurrentHeading(GetCurrentHeading() + GetTurnRate() * Util::Sign(target_rotation));
+	//}
+	//UpdateWhiskers(GetWhiskerAngle());
+
+
+	float target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
+
+
+
+	if (GetCollisionWhiskers()[0])
+	{
+		SetCurrentHeading(GetCurrentHeading() + GetTurnRate());
+	}
+	else if (GetCollisionWhiskers()[2])
+	{
+		SetCurrentHeading(GetCurrentHeading() - GetTurnRate());
+	}
+	else if (abs(target_rotation) > m_turnRate)
 	{
 		SetCurrentHeading(GetCurrentHeading() + GetTurnRate() * Util::Sign(target_rotation));
 	}
+
+	UpdateWhiskers(GetWhiskerAngle());
 }
 
 void Starship::Move()
