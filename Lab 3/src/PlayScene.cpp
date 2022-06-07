@@ -28,6 +28,11 @@ void PlayScene::Draw()
 			m_pStarship->GetMiddleLOSEndPoint(), m_pStarship->GetLineColor(1));
 		Util::DrawLine(m_pStarship->GetTransform()->position,
 			m_pStarship->GetRightLOSEndPoint(), m_pStarship->GetLineColor(2));
+		Util::DrawLine(m_pStarship->GetTransform()->position,
+			m_pStarship->GetLeftLOSEndPointX(), m_pStarship->GetLineColor(0));
+		Util::DrawLine(m_pStarship->GetTransform()->position,
+			m_pStarship->GetRightLOSEndPointX(), m_pStarship->GetLineColor(2));
+
 	}
 	SDL_SetRenderDrawColor(Renderer::Instance().GetRenderer(), 255, 255, 255, 255);
 }
@@ -313,7 +318,7 @@ void PlayScene::DoWhiskerCollision()
 	ship = ship_origin;
 	collisions[2] = SDL_IntersectRectAndLine(&box, &ship.x, &ship.y, &right.x, &right.y);
 
-	for (unsigned i = 0; i < 3; i++)
+	for (unsigned i = 0; i <3; i++)
 	{
 		m_pStarship->GetCollisionWhiskers()[i] = collisions[i];
 		m_pStarship->SetLineColor(i, (collisions[i] ? glm::vec4(1, 0, 0, 1) : glm::vec4(0, 1, 0, 1)));

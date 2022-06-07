@@ -95,6 +95,7 @@ void Starship::Seek()
 
 void Starship::LookWhereIAmGoing(glm::vec2 target_direction)
 {
+	//old version
 	//const auto target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
 
 	//if (abs(target_rotation) > m_turnRate) // Do I still need to rotate?
@@ -103,7 +104,7 @@ void Starship::LookWhereIAmGoing(glm::vec2 target_direction)
 	//}
 	//UpdateWhiskers(GetWhiskerAngle());
 
-
+	//lab3 version
 	float target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
 
 
