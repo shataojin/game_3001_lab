@@ -4,7 +4,8 @@
 
 #include "Scene.h"
 #include "TiledLevel.h"
-
+#include "Starship.h"
+#include"Target.h"
 class PlayScene : public Scene
 {
 public:
@@ -23,6 +24,9 @@ private:
 	std::string m_guiTitle;
 
 	// Lab 4 GameObjects
+	TiledLevel* m_pLevel;
+	Starship* m_pStarship;
+	Target* m_pTarget;
 
 	// Input Control
 	int m_pCurrentInputType{};

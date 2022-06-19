@@ -7,9 +7,9 @@
 Starship::Starship() : m_startPos( glm::vec2(300.0f, 500.0f) ),
 	m_maxSpeed(20.0f), m_turnRate(5.0f), m_accelerationRate(2.0f)
 {
-	TextureManager::Instance().Load("../Assets/textures/d7_small.png","d7");
+	TextureManager::Instance().Load("../Assets/textures/megaman_small.png","mm");
 
-	const auto size = TextureManager::Instance().GetTextureSize("d7");
+	const auto size = TextureManager::Instance().GetTextureSize("mm");
 	SetWidth(static_cast<int>(size.x));
 	SetHeight(static_cast<int>(size.y));
 	GetTransform()->position = m_startPos;
@@ -30,13 +30,13 @@ Starship::~Starship()
 void Starship::Draw()
 {
 	// draw the target
-	TextureManager::Instance().Draw("d7", GetTransform()->position, GetCurrentHeading(), 255, true);
+	TextureManager::Instance().Draw("mm", GetTransform()->position, GetCurrentHeading(), 255, true);
 }
 
 void Starship::Update()
 {
-	Move();
-	CheckBounds();
+	/*Move();
+	CheckBounds();*/
 }
 
 void Starship::Clean()

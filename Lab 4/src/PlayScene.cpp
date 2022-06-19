@@ -155,7 +155,21 @@ void PlayScene::Start()
 	m_pCurrentInputType = static_cast<int>(InputType::KEYBOARD_MOUSE);
 
 	// Create GameObjects
-	
+	m_pLevel = new TiledLevel("../Assets/data/level.txt", "../Assets/data/leveldata.txt",
+		"../Assets/textures/Tiles.png", "tiles", { 32,32 }, { 40,40 }, 15, 20, true, true);
+	AddChild(m_pLevel);
+
+	auto offset = glm::vec2(20, 20);
+
+	m_pTarget = new Target();
+	m_pTarget->GetTransform()->position = m_pLevel->GetTile(15, 11)->GetTransform()->position + offset;
+	m_pTarget->SetGridPosition(15.0f, 11.0f);
+	AddChild(m_pTarget);
+
+	m_pStarship = new Starship();
+	m_pStarship->GetTransform()->position = m_pLevel->GetTile(1, 3)->GetTransform()->position + offset;
+	m_pStarship->SetGridPosition(1.0f, 3.0f);
+	AddChild(m_pStarship);
 
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
@@ -178,6 +192,37 @@ void PlayScene::GUI_Function()
 	ImGui::RadioButton("Both", &m_pCurrentInputType, static_cast<int>(InputType::ALL));
 
 	ImGui::Separator();
+
+	static bool toggle_grid = false;
+	if (ImGui::Checkbox("Toggle Grid", &toggle_grid))
+	{
+		m_pLevel->SetLabelsEnabled(toggle_grid);
+	}
+
+	ImGui::Separator();
+
+	auto offset = glm::vec2(20, 20);
+
+	static int start_position[2] = { (int)m_pStarship->GetGridPosition().x,(int)m_pStarship->GetGridPosition().y };
+	if (ImGui::SliderInt2("Start Position", start_position, 0, 19))
+	{
+		if (start_position[1] > 14) start_position[1] = 14;
+
+		m_pStarship->GetTransform()->position = m_pLevel->GetTile(start_position[0],
+			start_position[1])->GetTransform()->position + offset;
+		m_pStarship->SetGridPosition(start_position[0], start_position[1]);
+	}
+
+	static int goal_position[2] = { (int)m_pTarget->GetGridPosition().x,(int)m_pTarget->GetGridPosition().y };
+
+	if (ImGui::SliderInt2("goal Position", goal_position, 0, 19))
+	{
+		if (goal_position[1] > 14) goal_position[1] = 14;
+
+		m_pTarget->GetTransform()->position = m_pLevel->GetTile(goal_position[0],
+			goal_position[1])->GetTransform()->position + offset;
+		m_pTarget->SetGridPosition(goal_position[0], goal_position[1]);
+	}
 
 	ImGui::End();
 }
