@@ -34,6 +34,9 @@
     <Filter Include="Data">
       <UniqueIdentifier>{80a3dc33-2f58-45d3-82da-ab6295e25a4a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pathfinder">
+      <UniqueIdentifier>{16042bef-c64d-4a95-94b4-57c30f4bb67b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\StartScene.cpp">
@@ -149,6 +152,18 @@
     </ClCompile>
     <ClCompile Include="..\src\Tile.cpp">
       <Filter>Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Megaman.cpp">
+      <Filter>Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathConnection.cpp">
+      <Filter>pathfinder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathNode.cpp">
+      <Filter>pathfinder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -319,6 +334,24 @@
     </ClInclude>
     <ClInclude Include="..\src\Tile.h">
       <Filter>Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Heuristic.h">
+      <Filter>Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Megaman.h">
+      <Filter>Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PathManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\NodeRecord.h">
+      <Filter>pathfinder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PathConnection.h">
+      <Filter>pathfinder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PathNode.h">
+      <Filter>pathfinder</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
