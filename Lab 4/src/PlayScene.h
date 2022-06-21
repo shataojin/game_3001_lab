@@ -4,8 +4,9 @@
 
 #include "Scene.h"
 #include "TiledLevel.h"
-#include "Starship.h"
 #include"Target.h"
+#include"Megaman.h"
+#include"Heuristic.h"
 class PlayScene : public Scene
 {
 public:
@@ -25,13 +26,16 @@ private:
 
 	// Lab 4 GameObjects
 	TiledLevel* m_pLevel;
-	Starship* m_pStarship;
+	Megaman* m_pMegaman;
 	Target* m_pTarget;
 
 	// Input Control
 	int m_pCurrentInputType{};
 	void GetPlayerInput();
 	void GetKeyboardInput();
+
+	void computeTileCosts();
+	Heuristic m_currentHeristic;
 };
 
 #endif /* defined (__PLAY_SCENE__) */

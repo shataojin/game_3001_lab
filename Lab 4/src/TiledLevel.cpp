@@ -1,6 +1,7 @@
 #include "TiledLevel.h"
 #include "TextureManager.h"
 #include <fstream>
+#include "PathNode.h"
 
 TiledLevel::TiledLevel(const std::string& levelMap, const std::string& tileData, 
 	const std::string& texturePath, const std::string& textureKey,
@@ -48,6 +49,10 @@ TiledLevel::TiledLevel(const std::string& levelMap, const std::string& tileData,
 				{
 					tile->SetGridPosition(col, row);
 					tile->AddLabels();
+					if (tile->GetTileType() != TileType::IMPASSABLE)
+					{
+						tile->AddNode();
+					}
 				}
 				m_level.push_back(tile);
 				// Push into additional vectors for quick testing.
@@ -120,50 +125,32 @@ void TiledLevel::LinkTiles()
 		for (int col = 0; col < m_cols; ++col)
 		{
 			Tile* tile = GetTile(col, row);
-
-			// TopMost Row?
-			if (row == 0)
+			if (tile->GetNode() == nullptr)continue;
+			//add tile above
+			if (row != 0 && GetTile(col, row - 1)->GetNode() != nullptr)
 			{
-				tile->SetTileNeighbour(TileNeighbour::TOP_TILE, nullptr);
+				tile->GetNode()->AddConnection(
+					new PathConnection(tile->GetNode(), GetTile(col, row - 1)->GetNode()));
 			}
-			else
+			//add tile below
+			if (row != m_rows-1 && GetTile(col, row + 1)->GetNode() != nullptr)
 			{
-				// setup Top Neighbour
-				tile->SetTileNeighbour(TileNeighbour::TOP_TILE, GetTile(col, row - 1));
+				tile->GetNode()->AddConnection(
+					new PathConnection(tile->GetNode(), GetTile(col, row + 1)->GetNode()));
 			}
-
-			// RightMost Col?
-			if (col == m_cols - 1)
+			//add tile left
+			if (col != 0 && GetTile(col-1, row )->GetNode() != nullptr)
 			{
-				tile->SetTileNeighbour(TileNeighbour::RIGHT_TILE, nullptr);
+				tile->GetNode()->AddConnection(
+					new PathConnection(tile->GetNode(), GetTile(col-1, row )->GetNode()));
 			}
-			else
+			//add tile right
+			if (col != m_cols-1 && GetTile(col+1, row )->GetNode() != nullptr)
 			{
-				// setup Right Neighbour
-				tile->SetTileNeighbour(TileNeighbour::RIGHT_TILE, GetTile(col + 1, row));
+				tile->GetNode()->AddConnection(
+					new PathConnection(tile->GetNode(), GetTile(col+1, row )->GetNode()));
 			}
-
-			// BottomMost Row?
-			if (row == m_rows - 1)
-			{
-				tile->SetTileNeighbour(TileNeighbour::BOTTOM_TILE, nullptr);
-			}
-			else
-			{
-				// Setup the Bottom Neighbour
-				tile->SetTileNeighbour(TileNeighbour::BOTTOM_TILE, GetTile(col, row + 1));
-			}
-
-			// LeftMost Col?
-			if (col == 0)
-			{
-				tile->SetTileNeighbour(TileNeighbour::LEFT_TILE, nullptr);
-			}
-			else
-			{
-				// Setup the Left Neighbour
-				tile->SetTileNeighbour(TileNeighbour::LEFT_TILE, GetTile(col - 1, row));
-			}
+			
 		}
 	}
 }

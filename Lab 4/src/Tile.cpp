@@ -1,11 +1,14 @@
 #include "Tile.h"
 #include "TextureManager.h"
 #include "Util.h"
+#include"PathNode.h"
+#include<sstream>
+#include<iomanip>
 
 Tile::Tile(SDL_FRect dst, TileType type) : m_src({0,0,0,0}), m_dst(dst), 
 	m_type(type), m_status(TileStatus::NONE), m_health(0), m_cost(0),
 	m_costLabel(nullptr), m_statusLabel(nullptr), m_labelsEnabled(false),
-	m_neighbours{nullptr}
+	m_node(nullptr)
 {
 	SetWidth(static_cast<int>(m_dst.w));
 	SetHeight(static_cast<int>(m_dst.h));
@@ -17,6 +20,8 @@ Tile::~Tile()
 	m_costLabel = nullptr;
 	delete m_statusLabel;
 	m_statusLabel = nullptr;
+	delete m_node;
+	m_node = nullptr;
 }
 
 void Tile::Draw()
@@ -28,6 +33,18 @@ void Tile::DrawNavigation()
 {
 	if (m_labelsEnabled) // Navigation features enabled.
 	{
+		if (m_node != nullptr)
+		{
+			for (const auto connection : m_node->GetConnections())
+			{
+				auto offset = glm::vec2(GetWidth() / 2, GetHeight() / 2);
+				Util::DrawLine(connection->GetFromNode()->GetTile()->GetTransform()->
+					position + offset, connection->GetFromNode()->GetTile()->GetTransform()->position + offset,
+					glm::vec4(0, 0, 0, 1));
+			}
+		}
+		
+
 		m_costLabel->Draw();
 		m_statusLabel->Draw();
 		switch (m_type)
@@ -96,15 +113,7 @@ void Tile::SetTileStatus(TileStatus status)
 	}
 }
 
-Tile* Tile::GetTileNeighbour(TileNeighbour position)
-{
-	return m_neighbours[static_cast<int>(position)];
-}
 
-void Tile::SetTileNeighbour(TileNeighbour position, Tile* tile)
-{
-	m_neighbours[static_cast<int>(position)] = tile;
-}
 
 unsigned short Tile::GetTileHealth() const
 {
@@ -124,6 +133,10 @@ float Tile::GetTileCost() const
 void Tile::SetTileCost(float cost)
 {
 	m_cost = cost;
+	std::stringstream stream;
+	stream << std::fixed << std::setprecision(1) << m_cost;
+	const std::string cost_string = stream.str();
+	m_costLabel->SetText(cost_string);
 }
 
 void Tile::SetDrawData(SDL_Rect src, const std::string& textureKey)
@@ -142,16 +155,26 @@ const std::string& Tile::GetTextureKey() const
 	return m_textureKey;
 }
 
+PathNode* Tile::GetNode() const
+{
+	return m_node;
+}
+
+void Tile::AddNode()
+{
+	m_node = new PathNode(this);
+}
+
 void Tile::AddLabels()
 {
 	auto offset = glm::vec2(m_dst.w * 0.5f, m_dst.h * 0.5f);
 
 	// Cost label.
-	m_costLabel = new Label("0.0", "Consolas", 12);
+	m_costLabel = new Label("", "Consolas", 12);
 	m_costLabel->GetTransform()->position = GetTransform()->position + offset + glm::vec2(0.0f, -6.0f);
 	m_costLabel->SetEnabled(false);
 	// Status label.
-	m_statusLabel = new Label("=", "Consolas", 12);
+	m_statusLabel = new Label("", "Consolas", 12);
 	m_statusLabel->GetTransform()->position = GetTransform()->position + offset + glm::vec2(0.0f, 6.0f);
 	m_statusLabel->SetEnabled(false);
 }

@@ -8,7 +8,7 @@
 #include "imgui_sdl.h"
 #include "Renderer.h"
 #include "Util.h"
-
+#include"PathNode.h"
 PlayScene::PlayScene()
 {
 	PlayScene::Start();
@@ -146,6 +146,29 @@ void PlayScene::GetKeyboardInput()
 	}
 }
 
+void PlayScene::computeTileCosts()
+{
+	float distance = 0.0f;
+	float dx, dy;
+	dx = dy = 0.0f;
+	for (auto tile : m_pLevel->GetLevel())
+	{
+		if (tile->GetTileType() == TileType::IMPASSABLE)continue;
+		switch (m_currentHeristic)
+		{
+		case Heuristic::MANHATTAN:
+			dx = abs(tile->GetGridPosition().x - m_pTarget->GetGridPosition().x);
+			dy = abs(tile->GetGridPosition().y - m_pTarget->GetGridPosition().y);
+			distance = dx + dy;
+			break;
+		case Heuristic::EUCLIDEAN:
+			distance = Util::Distance(tile->GetGridPosition(), m_pTarget->GetGridPosition());
+			break;
+		}
+		tile->SetTileCost(distance);
+	}
+}
+
 void PlayScene::Start()
 {
 	// Set GUI Title
@@ -156,7 +179,7 @@ void PlayScene::Start()
 
 	// Create GameObjects
 	m_pLevel = new TiledLevel("../Assets/data/level.txt", "../Assets/data/leveldata.txt",
-		"../Assets/textures/Tiles.png", "tiles", { 32,32 }, { 40,40 }, 15, 20, true, true);
+		"../Assets/textures/Tiles.png", "tiles", { 32,32 }, { 40,40 }, 15, 20, true,true);
 	AddChild(m_pLevel);
 
 	auto offset = glm::vec2(20, 20);
@@ -166,10 +189,10 @@ void PlayScene::Start()
 	m_pTarget->SetGridPosition(15.0f, 11.0f);
 	AddChild(m_pTarget);
 
-	m_pStarship = new Starship();
-	m_pStarship->GetTransform()->position = m_pLevel->GetTile(1, 3)->GetTransform()->position + offset;
-	m_pStarship->SetGridPosition(1.0f, 3.0f);
-	AddChild(m_pStarship);
+	m_pMegaman = new Megaman();
+	m_pMegaman->GetTransform()->position = m_pLevel->GetTile(1, 3)->GetTransform()->position + offset;
+	m_pMegaman->SetGridPosition(1.0f, 3.0f);
+	AddChild(m_pMegaman);
 
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
@@ -203,14 +226,14 @@ void PlayScene::GUI_Function()
 
 	auto offset = glm::vec2(20, 20);
 
-	static int start_position[2] = { (int)m_pStarship->GetGridPosition().x,(int)m_pStarship->GetGridPosition().y };
+	static int start_position[2] = { (int)m_pMegaman->GetGridPosition().x,(int)m_pMegaman->GetGridPosition().y };
 	if (ImGui::SliderInt2("Start Position", start_position, 0, 19))
 	{
 		if (start_position[1] > 14) start_position[1] = 14;
 
-		m_pStarship->GetTransform()->position = m_pLevel->GetTile(start_position[0],
+		m_pMegaman->GetTransform()->position = m_pLevel->GetTile(start_position[0],
 			start_position[1])->GetTransform()->position + offset;
-		m_pStarship->SetGridPosition(start_position[0], start_position[1]);
+		m_pMegaman->SetGridPosition(start_position[0], start_position[1]);
 	}
 
 	static int goal_position[2] = { (int)m_pTarget->GetGridPosition().x,(int)m_pTarget->GetGridPosition().y };
@@ -222,6 +245,18 @@ void PlayScene::GUI_Function()
 		m_pTarget->GetTransform()->position = m_pLevel->GetTile(goal_position[0],
 			goal_position[1])->GetTransform()->position + offset;
 		m_pTarget->SetGridPosition(goal_position[0], goal_position[1]);
+	}
+
+	ImGui::Separator();
+	static int radio = static_cast<int>(m_currentHeristic);
+	ImGui::Text("heuristic type");
+	ImGui::RadioButton("manhattan", &radio, static_cast<int>(Heuristic::MANHATTAN));
+	ImGui::SameLine();
+	ImGui::RadioButton("euclidean", &radio, static_cast<int>(Heuristic::EUCLIDEAN));
+
+	if (ImGui::Button("computer tile costs", { 208,20 }))
+	{
+		computeTileCosts();
 	}
 
 	ImGui::End();

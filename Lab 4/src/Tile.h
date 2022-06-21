@@ -9,6 +9,9 @@
 #include "TileStatus.h"
 #include "TileNeighbour.h"
 
+
+class PathNode;
+
 class Tile : public NavigationObject
 {
 public:
@@ -26,8 +29,7 @@ public:
 	void SetTileType(TileType type);
 	[[nodiscard]] TileStatus GetTileStatus() const;
 	void SetTileStatus(TileStatus status);
-	[[nodiscard]] Tile* GetTileNeighbour(TileNeighbour position);
-	void SetTileNeighbour(TileNeighbour position, Tile* tile);
+	
 	[[nodiscard]] unsigned short GetTileHealth() const;
 	void SetTileHealth(int health);
 	[[nodiscard]] float GetTileCost() const;
@@ -35,8 +37,11 @@ public:
 	void SetDrawData(SDL_Rect src, const std::string& textureKey);
 	[[nodiscard]] SDL_Rect GetSrc() const;
 	[[nodiscard]] const std::string& GetTextureKey() const;
+	[[nodiscard]] PathNode* GetNode() const;
 
 	// Others
+
+	void AddNode();
 	void AddLabels();
 	[[nodiscard]] bool GetLabelsEnabled() const;
 	void SetLabelsEnabled(bool state);
@@ -56,7 +61,7 @@ private:
 	Label* m_statusLabel;
 	bool m_labelsEnabled;
 
-	Tile* m_neighbours[static_cast<unsigned>(TileNeighbour::NUM_OF_NEIGHBOUR_TILES)];
+	PathNode* m_node;
 };
 
 #endif /* defined (__TILE__) */
