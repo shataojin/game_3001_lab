@@ -29,6 +29,7 @@ public:
 	[[nodiscard]] std::vector<Tile*>& GetLevel();
 	[[nodiscard]] std::vector<Tile*>& GetImpassables();
 	[[nodiscard]] std::vector<Tile*>& GetHazards();
+	[[nodiscard]] bool HasNavigation()const;
 
 private:
 	bool m_hasNavigation, m_renderTiles;

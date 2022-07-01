@@ -94,12 +94,13 @@ void TiledLevel::Draw()
 		}
 	}
 
-	if (m_hasNavigation)
+	if (m_hasNavigation&& m_level[0]->GetLabelsEnabled())
 	{
 		for (const auto tile : m_level)
 		{
 			tile->DrawNavigation();
 		}
+		PathManager::DrawPath();
 	}
 	
 }
@@ -184,4 +185,9 @@ std::vector<Tile*>& TiledLevel::GetImpassables()
 std::vector<Tile*>& TiledLevel::GetHazards()
 {
 	return m_hazards;
+}
+
+bool TiledLevel::HasNavigation()const
+{
+	return  m_hasNavigation;
 }

@@ -2,13 +2,13 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "InputType.h"
-
-// required for IMGUI
 #include "imgui.h"
 #include "imgui_sdl.h"
 #include "Renderer.h"
 #include "Util.h"
 #include"PathNode.h"
+#include"PathManager.h"
+
 PlayScene::PlayScene()
 {
 	PlayScene::Start();
@@ -259,5 +259,22 @@ void PlayScene::GUI_Function()
 		computeTileCosts();
 	}
 
+	ImGui::Separator();
+
+	if (ImGui::Button("get shortest path", { 208,20 })&& m_pLevel->HasNavigation())
+	{
+		
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("clear path", { 104,20 })&&m_pLevel->HasNavigation())
+	{
+		PathManager::ClearPath();
+		for (const auto tile : m_pLevel->GetLevel())
+		{
+			if (tile->GetTileType() == TileType::IMPASSABLE)continue;
+			tile->SetTileStatus(TileStatus::UNVISITED);
+		}
+	}
 	ImGui::End();
 }

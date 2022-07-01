@@ -172,7 +172,7 @@ void Tile::AddLabels()
 	m_costLabel->GetTransform()->position = GetTransform()->position + offset + glm::vec2(0.0f, -6.0f);
 	m_costLabel->SetEnabled(false);
 	// Status label.
-	auto offset = glm::vec2(m_dst.w * 0.25f, m_dst.h * 0.6f);
+	offset = glm::vec2(m_dst.w * 0.25f, m_dst.h * 0.6f);
 
 	m_statusLabel = new Label("", "Consolas", 12, { 255,255,255,255 });
 	m_statusLabel->GetTransform()->position = GetTransform()->position + offset + glm::vec2(0.0f, 6.0f);
