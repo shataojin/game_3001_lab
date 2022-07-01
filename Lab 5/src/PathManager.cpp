@@ -15,7 +15,7 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 		// Find the smallest element in the open list.
 		currentRecord = GetSmallestNode();
 		// If it is the goal node, then terminate.
-		if (currentRecord->m_node = goal)
+		if (currentRecord->m_node == goal)
 		{
 			s_open.erase(std::remove(s_open.begin(), s_open.end(), currentRecord), s_open.end());
 			s_closed.push_back(currentRecord);
@@ -130,7 +130,7 @@ NodeRecord* PathManager::GetNodeRecord(const std::vector<NodeRecord*>& list, con
 void PathManager::DrawPath()
 {
 	if (s_path.empty())return;
-	auto offset = glm::vec2(s_path[0]->GetFromNode()->GetTile()->GetWidth() / 2,
+	const auto offset = glm::vec2(s_path[0]->GetFromNode()->GetTile()->GetWidth() / 2,
 		s_path[0]->GetFromNode()->GetTile()->GetHeight() / 2);
 	for (const auto& connection : s_path)
 	{
@@ -155,16 +155,16 @@ void PathManager::ClearLists()
 		delete nr;
 		nr = nullptr;
 	}
-	s_path.clear();
-	s_path.shrink_to_fit();
+	s_open.clear();
+	s_open.shrink_to_fit();
 	//clean up close list
 	for (auto nr : s_closed)
 	{
 		delete nr;
 		nr = nullptr;
 	}
-	s_path.clear();
-	s_path.shrink_to_fit();
+	s_closed.clear();
+	s_closed.shrink_to_fit();
 }
 
 std::vector<NodeRecord*> PathManager::s_open;

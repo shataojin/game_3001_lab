@@ -9,6 +9,7 @@
 #include"PathNode.h"
 #include"PathManager.h"
 
+
 PlayScene::PlayScene()
 {
 	PlayScene::Start();
@@ -263,10 +264,20 @@ void PlayScene::GUI_Function()
 
 	if (ImGui::Button("get shortest path", { 208,20 })&& m_pLevel->HasNavigation())
 	{
-		
+		PathNode* startNode = m_pLevel->GetTile(m_pMegaman->GetGridPosition())->GetNode();
+		PathNode* goalNode = m_pLevel->GetTile(m_pTarget->GetGridPosition())->GetNode();
+		if (startNode != nullptr && goalNode != nullptr)
+		{
+			PathManager::GetShortestPath(startNode, goalNode);
+		}
+		else
+		{
+			std::cout << "cant get shortest path. one or more nodes are null" << std::endl;
+		}
 	}
 
 	ImGui::SameLine();
+
 	if (ImGui::Button("clear path", { 104,20 })&&m_pLevel->HasNavigation())
 	{
 		PathManager::ClearPath();
