@@ -262,7 +262,7 @@ void PlayScene::GUI_Function()
 
 	ImGui::Separator();
 
-	if (ImGui::Button("get shortest path", { 208,20 })&& m_pLevel->HasNavigation())
+	if (ImGui::Button("get shortest path", { 208,20 }))
 	{
 		PathNode* startNode = m_pLevel->GetTile(m_pMegaman->GetGridPosition())->GetNode();
 		PathNode* goalNode = m_pLevel->GetTile(m_pTarget->GetGridPosition())->GetNode();

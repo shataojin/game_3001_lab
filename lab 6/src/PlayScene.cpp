@@ -13,6 +13,7 @@
 #include "PathNode.h"
 #include "Config.h"
 #include <fstream>
+#include"PathManager.h"
 
 PlayScene::PlayScene()
 {
@@ -445,6 +446,28 @@ void PlayScene::GUI_Function()
 
 	ImGui::Separator();
 
-	
+	if (ImGui::Checkbox("draw a path", &m_isGridEnabled))
+	{
+
+			/*PathNode* startNode = m_pLevel->GetTile(m_pStarship->GetGridPosition())->GetNode();
+			PathNode* goalNode = m_pLevel->GetTile(m_pTarget->GetGridPosition())->GetNode();
+			if (startNode != nullptr && goalNode != nullptr)
+			{
+				PathManager::GetShortestPath(startNode, goalNode);
+			}
+			else
+			{
+				std::cout << "cant get shortest path. one or more nodes are null" << std::endl;
+			}*/
+	}
+
+	/*ImGui::Separator();
+
+	static bool toggle_grid = false;
+	if (ImGui::Checkbox("Toggle Grid", &toggle_grid))
+	{
+		m_pLevel->SetLabelsEnabled(toggle_grid);
+	}*/
+
 	ImGui::End();
 }

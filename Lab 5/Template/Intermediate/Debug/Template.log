@@ -1,52 +1,6 @@
-﻿  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  imgui_sdl.cpp
-  Agent.cpp
-  Button.cpp
-  CollisionManager.cpp
-  ImGuiWindowFrame.cpp
-  Megaman.cpp
-  NavigationObject.cpp
-  Obstacle.cpp
-  PathConnection.cpp
-  PathManager.cpp
-  PathNode.cpp
-  Sprite.cpp
-  Starship.cpp
-  Tile.cpp
-  TiledLevel.cpp
-  正在生成代码...
-  正在编译...
-  UIControl.cpp
-  DisplayObject.cpp
-  EndScene.cpp
-  FontManager.cpp
-  Game.cpp
-  GameController.cpp
-  GameObject.cpp
-  Label.cpp
-  PlayScene.cpp
-C:\Users\Administrator\Desktop\code\game_3001_lab\lab 6\src\PlayScene.cpp(237,66): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\lab 6\src\PlayScene.cpp(237,47): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\lab 6\src\PlayScene.cpp(248,63): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\lab 6\src\PlayScene.cpp(248,45): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-  main.cpp
-  Plane.cpp
-  Player.cpp
-  Renderer.cpp
-  Scene.cpp
-  Ship.cpp
-  SoundManager.cpp
-  EventManager.cpp
-  SpriteSheet.cpp
-  StartScene.cpp
-  Target.cpp
-  正在生成代码...
-  正在编译...
-  TextureManager.cpp
-  Util.cpp
-  正在生成代码...
-  Template.vcxproj -> C:\Users\Administrator\Desktop\code\game_3001_lab\lab 6\bin\Debug\Template.exe
+﻿  PlayScene.cpp
+C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(237,66): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(237,47): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(248,63): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(248,45): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+  Template.vcxproj -> C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\bin\Debug\Template.exe

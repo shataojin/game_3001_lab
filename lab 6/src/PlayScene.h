@@ -8,6 +8,7 @@
 #include "Starship.h"
 #include "Target.h"
 #include "LOSMode.h"
+#include "TiledLevel.h"
 
 class PlayScene : public Scene
 {
@@ -35,6 +36,7 @@ private:
 	// Game Objects
 	Target* m_pTarget;
 	Starship* m_pStarship;
+	TiledLevel* m_pLevel;
 	std::vector<Obstacle*> m_pObstacles;
 
 	void BuildObstaclePool();
