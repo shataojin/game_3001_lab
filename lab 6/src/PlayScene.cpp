@@ -2,13 +2,17 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "InputType.h"
-#include "Renderer.h"
-#include "Util.h"
-#include "PathNode.h"
 
 // required for IMGUI
 #include "imgui.h"
 #include "imgui_sdl.h"
+
+// required for Scene
+#include "Renderer.h"
+#include "Util.h"
+#include "PathNode.h"
+#include "Config.h"
+#include <fstream>
 
 PlayScene::PlayScene()
 {
@@ -22,11 +26,14 @@ void PlayScene::Draw()
 {
 	DrawDisplayList();
 
-	// draws the collision bounds of each obstacle
-	for (auto obstacle : m_pObstacles)
+	if(m_isGridEnabled)
 	{
-		auto offset = glm::vec2(obstacle->GetWidth() * 0.5f, obstacle->GetHeight() * 0.5f);
-		Util::DrawRect(obstacle->GetTransform()->position - offset, obstacle->GetWidth(), obstacle->GetHeight());
+		// draws the collision bounds of each obstacle
+		for (const auto obstacle : m_pObstacles)
+		{
+			auto offset = glm::vec2(obstacle->GetWidth() * 0.5f, obstacle->GetHeight() * 0.5f);
+			Util::DrawRect(obstacle->GetTransform()->position - offset, obstacle->GetWidth(), obstacle->GetHeight());
+		}
 	}
 
 	SDL_SetRenderDrawColor(Renderer::Instance().GetRenderer(), 255, 255, 255, 255);
@@ -35,7 +42,19 @@ void PlayScene::Draw()
 void PlayScene::Update()
 {
 	UpdateDisplayList();
-	m_checkShipLOS(m_pTarget);
+	m_checkAgentLOS(m_pStarship, m_pTarget);
+	switch(m_LOSMode)
+	{
+	case LOSMode::TARGET:
+		m_checkAllNodesWithTarget(m_pTarget);
+		break;
+	case LOSMode::SHIP:
+		m_checkAllNodesWithTarget(m_pStarship); 
+		break;
+	case LOSMode::BOTH:
+		m_checkAllNodesWithBoth(); 
+		break;
+	}
 }
 
 void PlayScene::Clean()
@@ -158,10 +177,21 @@ void PlayScene::GetKeyboardInput()
 
 void PlayScene::BuildObstaclePool()
 {
-	for (int i = 0; i < 3; ++i)
+	std::ifstream inFile("../Assets/data/obstacles.txt");
+
+	while(!inFile.eof())
 	{
-		m_pObstacles.push_back(new Obstacle());
+		std::cout << "Obstacle" << std::endl;
+		auto obstacle = new Obstacle();
+		float x, y, w, h; // same way the file is organized
+		inFile >> x >> y >> w >> h; // read data from the file line by line
+		obstacle->GetTransform()->position = glm::vec2(x, y);
+		obstacle->SetWidth(w);
+		obstacle->SetHeight(h);
+		AddChild(obstacle, 0);
+		m_pObstacles.push_back(obstacle);
 	}
+	inFile.close();
 }
 
 void PlayScene::m_buildGrid()
@@ -214,49 +244,6 @@ void PlayScene::m_toggleGrid(const bool state)
 	}
 }
 
-void PlayScene::m_checkShipLOS(DisplayObject* target_object) const
-{
-	m_pStarship->SetHasLOS(false); // default - no LOS
-
-	// if ship to target distance is less than or equal to the LOS Distance (Range)
-	const auto ship_to_range = Util::GetClosestEdge(m_pStarship->GetTransform()->position, target_object);
-	if(ship_to_range <= m_pStarship->GetLOSDistance())
-	{
-		// we are in range
-		std::vector<DisplayObject*> contact_list;
-		for (auto display_object : GetDisplayList())
-		{
-			if (display_object->GetType() == GameObjectType::PATH_NODE) { continue;  } // ignore these
-			if ((display_object->GetType() != m_pStarship->GetType()) && (display_object->GetType() != target_object->GetType()))
-			{
-				// check if the displayobject is closer to the starship than the target
-				const auto ship_to_object_distance = Util::GetClosestEdge(m_pStarship->GetTransform()->position, display_object);
-				if(ship_to_object_distance <= ship_to_range)
-				{
-					contact_list.push_back(display_object);
-				}
-			}
-		}
-
-		const auto has_LOS = CollisionManager::LOSCheck(m_pStarship,
-			m_pStarship->GetTransform()->position + m_pStarship->GetCurrentDirection() * m_pStarship->GetLOSDistance(),
-			contact_list, target_object);
-		m_pStarship->SetHasLOS(has_LOS);
-	}
-}
-
-void PlayScene::m_clearNodes()
-{
-	m_pGrid.clear();
-	for (auto display_object : GetDisplayList())
-	{
-		if(display_object->GetType() == GameObjectType::PATH_NODE)
-		{
-			RemoveChild(display_object);
-		}
-	}
-}
-
 bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object)
 {
 	bool has_LOS = false; // default - no LOS
@@ -273,7 +260,7 @@ bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object)
 		{
 			const auto agent_to_object_distance = Util::GetClosestEdge(agent->GetTransform()->position, display_object);
 			if (agent_to_object_distance > agent_to_range) { continue; } // target is out of range
-			if ((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
+			if((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
 			{
 				contact_list.push_back(display_object);
 			}
@@ -323,19 +310,36 @@ void PlayScene::m_setPathNodeLOSDistance(const int dist)
 	}
 }
 
+void PlayScene::m_clearNodes()
+{
+	m_pGrid.clear();
+	for (auto display_object : GetDisplayList())
+	{
+		if(display_object->GetType() == GameObjectType::PATH_NODE)
+		{
+			RemoveChild(display_object);
+		}
+	}
+}
+
 
 void PlayScene::Start()
 {
 	// Set GUI Title
-	m_guiTitle = "Lab 6 - Part 1";
+	m_guiTitle = "Lab 6 - Part 2";
+
+	// Setup a few more fields
+	m_LOSMode = LOSMode::TARGET;
+	m_pathNodeLOSDistance = 1000; // 1000px distance
+	m_setPathNodeLOSDistance(m_pathNodeLOSDistance);
 
 	// Set Input Type
 	m_pCurrentInputType = static_cast<int>(InputType::KEYBOARD_MOUSE);
 
 	// Add Game Objects
 	m_pTarget = new Target();
-	m_pTarget->GetTransform()->position = glm::vec2(600.0f, 300.0f);
-	AddChild(m_pTarget);
+	m_pTarget->GetTransform()->position = glm::vec2(550.0f, 300.0f);
+	AddChild(m_pTarget, 2);
 
 	m_pStarship = new Starship();
 	m_pStarship->GetTransform()->position = glm::vec2(150.0f, 300.0f);
@@ -343,17 +347,6 @@ void PlayScene::Start()
 
 	// Add Obstacles
 	BuildObstaclePool();
-
-	m_pObstacles[0]->GetTransform()->position = glm::vec2(380.0f, 80.0f);
-	m_pObstacles[0]->SetHeight(50);
-	AddChild(m_pObstacles[0]);
-
-	m_pObstacles[1]->GetTransform()->position = glm::vec2(380.0f, 280.0f);
-	m_pObstacles[1]->SetWidth(100);
-	AddChild(m_pObstacles[1]);
-
-	m_pObstacles[2]->GetTransform()->position = glm::vec2(380.0f, 480.0f);
-	AddChild(m_pObstacles[2]);
 
 	// Setup the Grid
 	m_isGridEnabled = false;
@@ -389,6 +382,23 @@ void PlayScene::GUI_Function()
 	if (ImGui::Checkbox("Toggle Grid", &m_isGridEnabled))
 	{
 		m_toggleGrid(m_isGridEnabled);
+	}
+
+	ImGui::Separator();
+
+	static int LOS_mode = static_cast<int>(m_LOSMode);
+	ImGui::Text("Path Node LOS");
+	ImGui::RadioButton("Target", &LOS_mode, static_cast<int>(LOSMode::TARGET)); ImGui::SameLine();
+	ImGui::RadioButton("StarShip", &LOS_mode, static_cast<int>(LOSMode::SHIP)); ImGui::SameLine();
+	ImGui::RadioButton("Both Target & StarShip", &LOS_mode, static_cast<int>(LOSMode::BOTH)); 
+	
+	m_LOSMode = static_cast<LOSMode>(LOS_mode);
+
+	ImGui::Separator();
+
+	if(ImGui::SliderInt("Path Node LOS Distance", &m_pathNodeLOSDistance, 0, 1000))
+	{
+		m_setPathNodeLOSDistance(m_pathNodeLOSDistance);
 	}
 
 	ImGui::Separator();

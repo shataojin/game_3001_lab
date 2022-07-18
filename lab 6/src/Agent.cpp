@@ -2,8 +2,8 @@
 
 #include "Util.h"
 
-Agent::Agent() :m_currentHeading(0.0f), m_LOSDistance(0.0f),
-m_hasLOS(false), m_whiskerAngle(0.0f)
+Agent::Agent():m_currentHeading(0.0f), m_LOSDistance(0.0f),
+	m_hasLOS(false), m_whiskerAngle(0.0f)
 { }
 
 Agent::~Agent()
