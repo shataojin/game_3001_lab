@@ -348,5 +348,8 @@
     <Text Include="..\Assets\data\leveldata.txt">
       <Filter>Data</Filter>
     </Text>
+    <Text Include="..\Assets\data\obstacles.txt">
+      <Filter>Data</Filter>
+    </Text>
   </ItemGroup>
 </Project>

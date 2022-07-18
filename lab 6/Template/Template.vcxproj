@@ -263,6 +263,7 @@
   <ItemGroup>
     <Text Include="..\Assets\data\level.txt" />
     <Text Include="..\Assets\data\leveldata.txt" />
+    <Text Include="..\Assets\data\obstacles.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
