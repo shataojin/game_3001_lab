@@ -7,8 +7,10 @@
 #include "NavigationObject.h"
 #include "TileType.h"
 #include "TileStatus.h"
+#include "TileNeighbour.h"
 
-class PathNode; // Forward declaration instead of an #include directive.
+
+class PathNode;
 
 class Tile : public NavigationObject
 {
@@ -38,7 +40,8 @@ public:
 	[[nodiscard]] PathNode* GetNode() const;
 
 	// Others
-	void AddNode(); // Really a setter.
+
+	void AddNode();
 	void AddLabels();
 	[[nodiscard]] bool GetLabelsEnabled() const;
 	void SetLabelsEnabled(bool state);
@@ -58,7 +61,7 @@ private:
 	Label* m_statusLabel;
 	bool m_labelsEnabled;
 
-	PathNode* m_node; // Node that could be part of the navigation graph.
+	PathNode* m_node;
 };
 
 #endif /* defined (__TILE__) */

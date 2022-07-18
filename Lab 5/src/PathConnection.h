@@ -15,7 +15,7 @@ public:
 	[[nodiscard]] PathNode* GetToNode() const;
 private:
 	int m_cost;
-	PathNode *m_pFromNode, *m_pToNode;
+	PathNode* m_pFromNode, * m_pToNode;
 };
 
 #endif /* defined (__PATH_CONNECTION__) */

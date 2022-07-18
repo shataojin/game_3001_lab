@@ -1,14 +1,14 @@
 #include "TiledLevel.h"
 #include "TextureManager.h"
-#include "PathManager.h"
-#include "PathNode.h"
 #include <fstream>
+#include "PathNode.h"
+#include"PathManager.h"
 
 TiledLevel::TiledLevel(const std::string& levelMap, const std::string& tileData, 
-                       const std::string& texturePath, const std::string& textureKey,
-                       const SDL_Point tileSrcSize, const SDL_FPoint tileDstSize, const unsigned short rows, const unsigned short cols, 
-                       const bool hasNavigation, const bool isRendered): m_hasNavigation(hasNavigation),
-                                                                         m_renderTiles(isRendered), m_textureKey(textureKey), m_rows(rows), m_cols(cols)
+	const std::string& texturePath, const std::string& textureKey,
+	const SDL_Point tileSrcSize, const SDL_FPoint tileDstSize, const unsigned short rows, const unsigned short cols, 
+	const bool hasNavigation, const bool isRendered): m_hasNavigation(hasNavigation),
+	m_renderTiles(isRendered), m_textureKey(textureKey), m_rows(rows), m_cols(cols)
 {
 	TextureManager::Instance().Load(texturePath, textureKey);
 	// Create map of prototypes.
@@ -52,7 +52,7 @@ TiledLevel::TiledLevel(const std::string& levelMap, const std::string& tileData,
 					tile->AddLabels();
 					if (tile->GetTileType() != TileType::IMPASSABLE)
 					{
-						tile->AddNode(); // Only add node to non-impassable tiles.
+						tile->AddNode();
 						tile->SetTileStatus(TileStatus::UNVISITED);
 					}
 				}
@@ -93,7 +93,8 @@ void TiledLevel::Draw()
 			tile->Draw();
 		}
 	}
-	if (m_hasNavigation && m_level[0]->GetLabelsEnabled())
+
+	if (m_hasNavigation&& m_level[0]->GetLabelsEnabled())
 	{
 		for (const auto tile : m_level)
 		{
@@ -101,6 +102,7 @@ void TiledLevel::Draw()
 		}
 		PathManager::DrawPath();
 	}
+	
 }
 
 void TiledLevel::Update()
@@ -130,32 +132,32 @@ void TiledLevel::LinkTiles()
 		for (int col = 0; col < m_cols; ++col)
 		{
 			Tile* tile = GetTile(col, row);
-			if (tile->GetNode() == nullptr) continue; // Don't add neighbours to a null node.
-
-			// Add connection to Tile above.
+			if (tile->GetNode() == nullptr)continue;
+			//add tile above
 			if (row != 0 && GetTile(col, row - 1)->GetNode() != nullptr)
 			{
 				tile->GetNode()->AddConnection(
-					new PathConnection(tile->GetNode(), GetTile(col, row - 1)->GetNode()) );
+					new PathConnection(tile->GetNode(), GetTile(col, row - 1)->GetNode()));
 			}
-			// Add connection to Tile below.
-			if (row != m_rows - 1 && GetTile(col, row + 1)->GetNode() != nullptr)
+			//add tile below
+			if (row != m_rows-1 && GetTile(col, row + 1)->GetNode() != nullptr)
 			{
 				tile->GetNode()->AddConnection(
 					new PathConnection(tile->GetNode(), GetTile(col, row + 1)->GetNode()));
 			}
-			// Add connection to Tile to left.
-			if (col != 0 && GetTile(col - 1, row)->GetNode() != nullptr)
+			//add tile left
+			if (col != 0 && GetTile(col-1, row )->GetNode() != nullptr)
 			{
 				tile->GetNode()->AddConnection(
-					new PathConnection(tile->GetNode(), GetTile(col - 1, row)->GetNode()));
+					new PathConnection(tile->GetNode(), GetTile(col-1, row )->GetNode()));
 			}
-			// Add connection to Tile to right.
-			if (col != m_cols - 1 && GetTile(col + 1, row)->GetNode() != nullptr)
+			//add tile right
+			if (col != m_cols-1 && GetTile(col+1, row )->GetNode() != nullptr)
 			{
 				tile->GetNode()->AddConnection(
-					new PathConnection(tile->GetNode(), GetTile(col + 1, row)->GetNode()));
+					new PathConnection(tile->GetNode(), GetTile(col+1, row )->GetNode()));
 			}
+			
 		}
 	}
 }
@@ -185,7 +187,7 @@ std::vector<Tile*>& TiledLevel::GetHazards()
 	return m_hazards;
 }
 
-bool TiledLevel::HasNavigation() const
+bool TiledLevel::HasNavigation()const
 {
-	return m_hasNavigation;
+	return  m_hasNavigation;
 }

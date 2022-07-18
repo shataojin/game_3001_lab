@@ -2,21 +2,22 @@
 #ifndef __PATH_NODE__
 #define __PATH_NODE__
 
-#include "Agent.h"
+#include <vector>
+#include "PathConnection.h"
+#include "Tile.h"
 
-class PathNode : public Agent
+class PathNode
 {
 public:
-	PathNode();
+	PathNode(Tile* tile);
 	~PathNode();
-
-	// Inherited via GameObject
-	void Draw() override;
-	void Update() override;
-	void Clean() override;
-
+	void Update();
+	[[nodiscard]] Tile* GetTile() const;
+	void AddConnection(PathConnection* c);
+	std::vector<PathConnection*>& GetConnections();
 private:
-
+	Tile* m_tile; // Tile that this node belongs to.
+	std::vector<PathConnection*> m_connections;
 };
 
 #endif /* defined (__PATH_NODE__) */

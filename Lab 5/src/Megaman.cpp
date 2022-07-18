@@ -21,7 +21,7 @@ Megaman::Megaman() : m_startPos( glm::vec2(300.0f, 500.0f) ),
 	SetLOSDistance(300.0f);
 	SetWhiskerAngle(45.0f);
 
-	SetType(GameObjectType::STAR_SHIP);
+	SetType(GameObjectType::SPACE_SHIP);
 }
 
 Megaman::~Megaman()

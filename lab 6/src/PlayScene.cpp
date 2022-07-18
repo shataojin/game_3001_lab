@@ -2,13 +2,13 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "InputType.h"
-#include "imgui.h"
-#include "imgui_sdl.h"
 #include "Renderer.h"
 #include "Util.h"
-#include"PathNode.h"
-#include"PathManager.h"
+#include "PathNode.h"
 
+// required for IMGUI
+#include "imgui.h"
+#include "imgui_sdl.h"
 
 PlayScene::PlayScene()
 {
@@ -21,12 +21,21 @@ PlayScene::~PlayScene()
 void PlayScene::Draw()
 {
 	DrawDisplayList();
+
+	// draws the collision bounds of each obstacle
+	for (auto obstacle : m_pObstacles)
+	{
+		auto offset = glm::vec2(obstacle->GetWidth() * 0.5f, obstacle->GetHeight() * 0.5f);
+		Util::DrawRect(obstacle->GetTransform()->position - offset, obstacle->GetWidth(), obstacle->GetHeight());
+	}
+
 	SDL_SetRenderDrawColor(Renderer::Instance().GetRenderer(), 255, 255, 255, 255);
 }
 
 void PlayScene::Update()
 {
 	UpdateDisplayList();
+	m_checkShipLOS(m_pTarget);
 }
 
 void PlayScene::Clean()
@@ -147,59 +156,153 @@ void PlayScene::GetKeyboardInput()
 	}
 }
 
-void PlayScene::computeTileCosts()
+void PlayScene::BuildObstaclePool()
 {
-	float distance = 0.0f;
-	float dx, dy;
-	dx = dy = 0.0f;
-	for (auto tile : m_pLevel->GetLevel())
+	for (int i = 0; i < 3; ++i)
 	{
-		if (tile->GetTileType() == TileType::IMPASSABLE)continue;
-		switch (m_currentHeristic)
-		{
-		case Heuristic::MANHATTAN:
-			dx = abs(tile->GetGridPosition().x - m_pTarget->GetGridPosition().x);
-			dy = abs(tile->GetGridPosition().y - m_pTarget->GetGridPosition().y);
-			distance = dx + dy;
-			break;
-		case Heuristic::EUCLIDEAN:
-			distance = Util::Distance(tile->GetGridPosition(), m_pTarget->GetGridPosition());
-			break;
-		}
-		tile->SetTileCost(distance);
+		m_pObstacles.push_back(new Obstacle());
 	}
 }
+
+void PlayScene::m_buildGrid()
+{
+	const auto tile_size = Config::TILE_SIZE;
+	auto offset = glm::vec2(Config::TILE_SIZE * 0.5f, Config::TILE_SIZE * 0.5f);
+
+	m_clearNodes(); // we will need to clear nodes every time we move an obstacle
+
+	// lay out a grid of path_nodes
+	for (int row = 0; row < Config::ROW_NUM; ++row)
+	{
+		for (int col = 0; col < Config::COL_NUM; ++col)
+		{
+			PathNode* path_node = new PathNode();
+			path_node->GetTransform()->position = 
+				glm::vec2(static_cast<float>(col) * tile_size + offset.x, static_cast<float>(row) * tile_size + offset.y);
+
+			bool keep_node = true;
+			for (auto obstacle : m_pObstacles)
+			{
+				// determine which path_nodes are inside the obstacles
+				if(CollisionManager::AABBCheck(path_node, obstacle))
+				{
+					keep_node = false;
+				}
+			}
+
+			if (keep_node)
+			{
+				AddChild(path_node);
+				m_pGrid.push_back(path_node);
+			}
+			else
+			{
+				delete path_node;
+			}
+		}
+	}
+
+	// only display the Grid if it is toggled on
+	m_toggleGrid(m_isGridEnabled);
+}
+
+void PlayScene::m_toggleGrid(const bool state)
+{
+	for (auto path_node : m_pGrid)
+	{
+		path_node->SetVisible(state);
+	}
+}
+
+void PlayScene::m_checkShipLOS(DisplayObject* target_object) const
+{
+	m_pStarship->SetHasLOS(false); // default - no LOS
+
+	// if ship to target distance is less than or equal to the LOS Distance (Range)
+	const auto ship_to_range = Util::GetClosestEdge(m_pStarship->GetTransform()->position, target_object);
+	if(ship_to_range <= m_pStarship->GetLOSDistance())
+	{
+		// we are in range
+		std::vector<DisplayObject*> contact_list;
+		for (auto display_object : GetDisplayList())
+		{
+			if (display_object->GetType() == GameObjectType::PATH_NODE) { continue;  } // ignore these
+			if ((display_object->GetType() != m_pStarship->GetType()) && (display_object->GetType() != target_object->GetType()))
+			{
+				// check if the displayobject is closer to the starship than the target
+				const auto ship_to_object_distance = Util::GetClosestEdge(m_pStarship->GetTransform()->position, display_object);
+				if(ship_to_object_distance <= ship_to_range)
+				{
+					contact_list.push_back(display_object);
+				}
+			}
+		}
+
+		const auto has_LOS = CollisionManager::LOSCheck(m_pStarship,
+			m_pStarship->GetTransform()->position + m_pStarship->GetCurrentDirection() * m_pStarship->GetLOSDistance(),
+			contact_list, target_object);
+		m_pStarship->SetHasLOS(has_LOS);
+	}
+}
+
+void PlayScene::m_clearNodes()
+{
+	m_pGrid.clear();
+	for (auto display_object : GetDisplayList())
+	{
+		if(display_object->GetType() == GameObjectType::PATH_NODE)
+		{
+			RemoveChild(display_object);
+		}
+	}
+}
+
 
 void PlayScene::Start()
 {
 	// Set GUI Title
-	m_guiTitle = "Play Scene";
+	m_guiTitle = "Lab 6 - Part 1";
 
 	// Set Input Type
 	m_pCurrentInputType = static_cast<int>(InputType::KEYBOARD_MOUSE);
 
-	// Create GameObjects
-	m_pLevel = new TiledLevel("../Assets/data/level.txt", "../Assets/data/leveldata.txt",
-		"../Assets/textures/Tiles.png", "tiles", { 32,32 }, { 40,40 }, 15, 20, true,true);
-	AddChild(m_pLevel);
-
-	auto offset = glm::vec2(20, 20);
-
+	// Add Game Objects
 	m_pTarget = new Target();
-	m_pTarget->GetTransform()->position = m_pLevel->GetTile(15, 11)->GetTransform()->position + offset;
-	m_pTarget->SetGridPosition(15.0f, 11.0f);
+	m_pTarget->GetTransform()->position = glm::vec2(600.0f, 300.0f);
 	AddChild(m_pTarget);
 
-	m_pMegaman = new Megaman();
-	m_pMegaman->GetTransform()->position = m_pLevel->GetTile(1, 3)->GetTransform()->position + offset;
-	m_pMegaman->SetGridPosition(1.0f, 3.0f);
-	AddChild(m_pMegaman);
+	m_pStarship = new Starship();
+	m_pStarship->GetTransform()->position = glm::vec2(150.0f, 300.0f);
+	AddChild(m_pStarship, 2);
+
+	// Add Obstacles
+	BuildObstaclePool();
+
+	m_pObstacles[0]->GetTransform()->position = glm::vec2(380.0f, 80.0f);
+	m_pObstacles[0]->SetHeight(50);
+	AddChild(m_pObstacles[0]);
+
+	m_pObstacles[1]->GetTransform()->position = glm::vec2(380.0f, 280.0f);
+	m_pObstacles[1]->SetWidth(100);
+	AddChild(m_pObstacles[1]);
+
+	m_pObstacles[2]->GetTransform()->position = glm::vec2(380.0f, 480.0f);
+	AddChild(m_pObstacles[2]);
+
+	// Setup the Grid
+	m_isGridEnabled = false;
+	m_buildGrid();
+	m_toggleGrid(m_isGridEnabled);
+
+	// preload sounds
+	SoundManager::Instance().Load("../Assets/audio/yay.ogg", "yay", SoundType::SOUND_SFX);
+	SoundManager::Instance().Load("../Assets/audio/thunder.ogg", "thunder", SoundType::SOUND_SFX);
 
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
 }
 
-void PlayScene::GUI_Function() 
+void PlayScene::GUI_Function()
 {
 	// Always open with a NewFrame
 	ImGui::NewFrame();
@@ -217,75 +320,55 @@ void PlayScene::GUI_Function()
 
 	ImGui::Separator();
 
-	static bool toggle_grid = false;
-	if (ImGui::Checkbox("Toggle Grid", &toggle_grid))
+	if (ImGui::Checkbox("Toggle Grid", &m_isGridEnabled))
 	{
-		m_pLevel->SetLabelsEnabled(toggle_grid);
+		m_toggleGrid(m_isGridEnabled);
 	}
 
 	ImGui::Separator();
 
-	auto offset = glm::vec2(20, 20);
+	// spaceship properties
 
-	static int start_position[2] = { (int)m_pMegaman->GetGridPosition().x,(int)m_pMegaman->GetGridPosition().y };
-	if (ImGui::SliderInt2("Start Position", start_position, 0, 19))
+	static int shipPosition[] = { static_cast<int>(m_pStarship->GetTransform()->position.x), static_cast<int>(m_pStarship->GetTransform()->position.y)};
+	if (ImGui::SliderInt2("Ship Position", shipPosition, 0, 800))
 	{
-		if (start_position[1] > 14) start_position[1] = 14;
-
-		m_pMegaman->GetTransform()->position = m_pLevel->GetTile(start_position[0],
-			start_position[1])->GetTransform()->position + offset;
-		m_pMegaman->SetGridPosition(start_position[0], start_position[1]);
+		m_pStarship->GetTransform()->position.x = static_cast<float>(shipPosition[0]);
+		m_pStarship->GetTransform()->position.y = static_cast<float>(shipPosition[1]);
 	}
 
-	static int goal_position[2] = { (int)m_pTarget->GetGridPosition().x,(int)m_pTarget->GetGridPosition().y };
-
-	if (ImGui::SliderInt2("goal Position", goal_position, 0, 19))
+	// allow the ship to rotate
+	static int angle;
+	if (ImGui::SliderInt("Ship Direction", &angle, -360, 360))
 	{
-		if (goal_position[1] > 14) goal_position[1] = 14;
-
-		m_pTarget->GetTransform()->position = m_pLevel->GetTile(goal_position[0],
-			goal_position[1])->GetTransform()->position + offset;
-		m_pTarget->SetGridPosition(goal_position[0], goal_position[1]);
+		m_pStarship->SetCurrentHeading(static_cast<float>(angle));
 	}
 
-	ImGui::Separator();
-	static int radio = static_cast<int>(m_currentHeristic);
-	ImGui::Text("heuristic type");
-	ImGui::RadioButton("manhattan", &radio, static_cast<int>(Heuristic::MANHATTAN));
-	ImGui::SameLine();
-	ImGui::RadioButton("euclidean", &radio, static_cast<int>(Heuristic::EUCLIDEAN));
+	// Target properties
 
-	if (ImGui::Button("computer tile costs", { 208,20 }))
+	static int targetPosition[] = { static_cast<int>( m_pTarget->GetTransform()->position.x), static_cast<int>(m_pTarget->GetTransform()->position.y) };
+	if (ImGui::SliderInt2("Target Position", targetPosition, 0, 800))
 	{
-		computeTileCosts();
+		m_pTarget->GetTransform()->position.x = static_cast<float>(targetPosition[0]);
+		m_pTarget->GetTransform()->position.y = static_cast<float>(targetPosition[1]);
 	}
 
 	ImGui::Separator();
 
-	if (ImGui::Button("get shortest path", { 208,20 })&& m_pLevel->HasNavigation())
+	// Add Obstacle Position Control for all obstacles
+	for (unsigned i = 0; i < m_pObstacles.size(); ++i)
 	{
-		PathNode* startNode = m_pLevel->GetTile(m_pMegaman->GetGridPosition())->GetNode();
-		PathNode* goalNode = m_pLevel->GetTile(m_pTarget->GetGridPosition())->GetNode();
-		if (startNode != nullptr && goalNode != nullptr)
+		int obstaclePosition[] = { static_cast<int>(m_pObstacles[i]->GetTransform()->position.x), static_cast<int>(m_pObstacles[i]->GetTransform()->position.y) };
+		std::string label = "Obstacle" + std::to_string(i + 1) + " Position";
+		if (ImGui::SliderInt2(label.c_str(), obstaclePosition, 0, 800))
 		{
-			PathManager::GetShortestPath(startNode, goalNode);
-		}
-		else
-		{
-			std::cout << "cant get shortest path. one or more nodes are null" << std::endl;
+			m_pObstacles[i]->GetTransform()->position.x = static_cast<float>(obstaclePosition[0]);
+			m_pObstacles[i]->GetTransform()->position.y = static_cast<float>(obstaclePosition[1]);
+			m_buildGrid();
 		}
 	}
 
-	ImGui::SameLine();
+	ImGui::Separator();
 
-	if (ImGui::Button("clear path", { 104,20 })&&m_pLevel->HasNavigation())
-	{
-		PathManager::ClearPath();
-		for (const auto tile : m_pLevel->GetLevel())
-		{
-			if (tile->GetTileType() == TileType::IMPASSABLE)continue;
-			tile->SetTileStatus(TileStatus::UNVISITED);
-		}
-	}
+	
 	ImGui::End();
 }

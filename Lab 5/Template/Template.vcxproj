@@ -29,13 +29,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -170,9 +170,12 @@
     <ClCompile Include="..\src\NavigationObject.cpp" />
     <ClCompile Include="..\src\Obstacle.cpp" />
     <ClCompile Include="..\src\PathConnection.cpp" />
+    <ClCompile Include="..\src\PathManager.cpp" />
     <ClCompile Include="..\src\PathNode.cpp" />
     <ClCompile Include="..\src\Sprite.cpp" />
     <ClCompile Include="..\src\Starship.cpp" />
+    <ClCompile Include="..\src\Tile.cpp" />
+    <ClCompile Include="..\src\TiledLevel.cpp" />
     <ClCompile Include="..\src\UIControl.cpp" />
     <ClCompile Include="..\src\DisplayObject.cpp" />
     <ClCompile Include="..\src\EndScene.cpp" />
@@ -216,13 +219,16 @@
     <ClInclude Include="..\src\Megaman.h" />
     <ClInclude Include="..\src\NavigationObject.h" />
     <ClInclude Include="..\src\NodeRecord.h" />
-    <ClInclude Include="..\src\Obstacle.h" />
     <ClInclude Include="..\src\PathConnection.h" />
+    <ClInclude Include="..\src\PathManager.h" />
     <ClInclude Include="..\src\PathNode.h" />
+    <ClInclude Include="..\src\Tile.h" />
+    <ClInclude Include="..\src\TileNeighbour.h" />
+    <ClInclude Include="..\src\Obstacle.h" />
     <ClInclude Include="..\src\SoundType.h" />
     <ClInclude Include="..\src\Sprite.h" />
     <ClInclude Include="..\src\Starship.h" />
-    <ClInclude Include="..\src\TileNeighbour.h" />
+    <ClInclude Include="..\src\TiledLevel.h" />
     <ClInclude Include="..\src\TileStatus.h" />
     <ClInclude Include="..\src\TileType.h" />
     <ClInclude Include="..\src\UIControl.h" />
@@ -263,6 +269,10 @@
   <ItemGroup>
     <Text Include="..\Assets\data\level.txt" />
     <Text Include="..\Assets\data\leveldata.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Assets\textures\megaman_small.png" />
+    <Image Include="..\Assets\textures\Tiles.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
