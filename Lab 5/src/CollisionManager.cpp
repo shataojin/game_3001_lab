@@ -46,13 +46,18 @@ bool CollisionManager::SquaredRadiusCheck(GameObject* object1, GameObject* objec
 
 bool CollisionManager::AABBCheck(GameObject* object1, GameObject* object2)
 {
-	// prepare relevant variables
-	const auto p1 = object1->GetTransform()->position;
-	const auto p2 = object2->GetTransform()->position;
 	const auto p1_width = static_cast<float>(object1->GetWidth());
 	const auto p1_height = static_cast<float>(object1->GetHeight());
 	const auto p2_width = static_cast<float>(object2->GetWidth());
 	const auto p2_height = static_cast<float>(object2->GetHeight());
+
+	const auto p1Offset = glm::vec2(p1_width * 0.5f, p1_height * 0.5f);
+	const auto p2Offset = glm::vec2(p2_width * 0.5f, p2_height * 0.5f);
+
+	// prepare relevant variables
+	const auto p1 = object1->GetTransform()->position - p1Offset;
+	const auto p2 = object2->GetTransform()->position - p2Offset;
+	
 
 	if ( // Collision check.
 		p1.x < p2.x + p2_width &&
@@ -357,54 +362,24 @@ bool CollisionManager::LOSCheck(Agent* agent, const glm::vec2 end_point, const s
 {
 	const auto start_point = agent->GetTransform()->position;
 
-	for (const auto object : objects)
+	// Check collision with obstacles first.
+	for (auto object : objects)
 	{
-		const auto width = static_cast<float>(object->GetWidth());
-		const auto height = static_cast<float>(object->GetHeight());
-		auto object_offset = glm::vec2(width * 0.5f, height * 0.5f);
-		const auto rect_start = object->GetTransform()->position - object_offset;
-		
-
-		switch (object->GetType())
+		auto objectOffset = glm::vec2(object->GetWidth() * 0.5f, object->GetHeight() * 0.5f);
+		if (LineRectCheck(start_point, end_point, object->GetTransform()->position - objectOffset,
+			object->GetWidth(), object->GetHeight()))
 		{
-		case GameObjectType::OBSTACLE:
-			if (LineRectCheck(start_point, end_point, rect_start, width, height))
-			{
-				return false;
-			}
-			break;
-		case GameObjectType::TARGET:
-		{
-			switch (agent->GetType())
-			{
-			case GameObjectType::AGENT:
-				if (LineRectCheck(start_point, end_point, rect_start, width, height))
-				{
-					return true;
-				}
-				break;
-			case GameObjectType::PATH_NODE:
-				if (LineRectEdgeCheck(start_point, rect_start, width, height))
-				{
-					return true;
-				}
-				break;
-			default:
-				//error
-				std::cout << "ERROR: " << static_cast<int>(agent->GetType()) << std::endl;
-				break;
-			}
+			return false;
 		}
-		break;
-		default:
-			//error
-			std::cout << "ERROR: " << static_cast<int>(object->GetType()) << std::endl;
-			break;
-		}
-
 	}
-
-	// if the line does not collide with an object that is the target then LOS is false
+	// Now check if hitting target.
+	auto targetOffset = glm::vec2(target->GetWidth() * 0.5f, target->GetHeight() * 0.5f);
+	if (LineRectCheck(start_point, end_point, target->GetTransform()->position - targetOffset,
+		target->GetWidth(), target->GetHeight()))
+	{
+		return true;
+	}
+	// Nothing hit.
 	return false;
 }
 

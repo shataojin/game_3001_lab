@@ -5,7 +5,7 @@ enum class GameObjectType {
 	NONE = -1,
 	AGENT,
 	PATH_NODE,
-	SPACE_SHIP,
+	STAR_SHIP,
 	OBSTACLE,
 	SHIP,
 	TARGET,

@@ -1,10 +1,11 @@
 #include "PathManager.h"
-#include"Util.h"
+#include "Util.h"
+
 void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated for Lab 5.
 {
 	// Clear the path.
 	ClearPath();
-	// Initialize the current node record used in the aalgorithm.
+	// Initialize the current node record used in the algorithm.
 	NodeRecord* currentRecord = nullptr;
 	// Initialize the record for the start node.
 	s_open.push_back(new NodeRecord(start));
@@ -15,7 +16,7 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 		// Find the smallest element in the open list.
 		currentRecord = GetSmallestNode();
 		// If it is the goal node, then terminate.
-		if (currentRecord->m_node == goal)
+		if (currentRecord->m_node == goal) // We found the goal!
 		{
 			s_open.erase(std::remove(s_open.begin(), s_open.end(), currentRecord), s_open.end());
 			s_closed.push_back(currentRecord);
@@ -23,7 +24,7 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 			break;
 		}
 		// Otherwise get its outgoing connections.
-		std::vector<PathConnection*>connections = currentRecord->m_node->GetConnections();
+		std::vector<PathConnection*> connections = currentRecord->m_node->GetConnections();
 		// Loop through each connection in turn.
 		for (const auto& connection : connections)
 		{
@@ -32,15 +33,15 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 			NodeRecord* endNodeRecord;
 			const int endNodeCost = currentRecord->m_costSoFar + connection->GetCost();
 			// Skip if the node is closed.
-			if (ContainsNode(s_closed, endNode))continue;
-			// Or if it is open and weâ€™ve found a worse route.
+			if (ContainsNode(s_closed, endNode)) continue;
+			// Or if it is open and we’ve found a worse route.
 			else if (ContainsNode(s_open, endNode))
 			{
 				endNodeRecord = GetNodeRecord(s_open, endNode);
 				if (endNodeRecord->m_costSoFar <= endNodeCost)
 					continue;
 			}
-			//Otherwise we know weâ€™ve got an unvisited node, so make a record for it.
+			//Otherwise we know we’ve got an unvisited node, so make a record for it.
 			else
 			{
 				endNodeRecord = new NodeRecord();
@@ -49,7 +50,7 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 			// We need to update the node, so update the cost and connection.
 			endNodeRecord->m_costSoFar = endNodeCost;
 			endNodeRecord->m_connection = connection;
-			endNodeRecord->m_fromRecord = currentRecord;
+			endNodeRecord->m_fromRecord = currentRecord; // Our way back.
 			// And node to the open list.
 			if (!ContainsNode(s_open, endNode))
 			{
@@ -57,16 +58,13 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 				endNodeRecord->m_node->GetTile()->SetTileStatus(TileStatus::OPEN);
 			}
 		}
-		// Weâ€™ve finished looking at the connections for the current node, so add it to the closed list... 
+		// We’ve finished looking at the connections for the current node, so update the lists. 
 		s_open.erase(std::remove(s_open.begin(), s_open.end(), currentRecord), s_open.end());
 		s_closed.push_back(currentRecord);
 		currentRecord->m_node->GetTile()->SetTileStatus(TileStatus::CLOSED);
-	
-		// ...and remove it from the open list.
-
 	}
-	// Weâ€™re here if weâ€™ve either found the goal, or if weâ€™ve  no more nodes to search, find which.
-	if(currentRecord->m_node!=goal)
+	// We’re here if we’ve either found the goal, or if we’ve no more nodes to search, then not.
+	if (currentRecord->m_node != goal)
 	{
 		std::cout << "Could not find path!" << std::endl;
 	}
@@ -74,7 +72,7 @@ void PathManager::GetShortestPath(PathNode* start, PathNode* goal) // Updated fo
 	{
 		std::cout << "Found goal!" << std::endl;
 		// Compile the list of connections for the path.
-		while (currentRecord->m_node!=start)
+		while(currentRecord->m_node != start)
 		{
 			s_path.push_back(currentRecord->m_connection);
 			currentRecord = currentRecord->m_fromRecord;
@@ -129,14 +127,15 @@ NodeRecord* PathManager::GetNodeRecord(const std::vector<NodeRecord*>& list, con
 
 void PathManager::DrawPath()
 {
-	if (s_path.empty())return;
-	const auto offset = glm::vec2(s_path[0]->GetFromNode()->GetTile()->GetWidth() / 2,
-		s_path[0]->GetFromNode()->GetTile()->GetHeight() / 2);
+	if (s_path.empty()) return;
+	// Draw path.
+	const auto offset = glm::vec2(s_path[0]->GetFromNode()->GetTile()->GetWidth() /2,
+	                              s_path[0]->GetFromNode()->GetTile()->GetHeight() / 2);
 	for (const auto& connection : s_path)
 	{
 		Util::DrawLine(connection->GetFromNode()->GetTile()->GetTransform()->position + offset,
 			connection->GetToNode()->GetTile()->GetTransform()->position + offset,
-			glm::vec4(1, 1, 0, 1));
+			glm::vec4(1,1,0,1));
 	}
 }
 
@@ -149,7 +148,7 @@ void PathManager::ClearPath()
 
 void PathManager::ClearLists()
 {
-	//clean up open list
+	// Clean up open list.
 	for (auto nr : s_open)
 	{
 		delete nr;
@@ -157,7 +156,7 @@ void PathManager::ClearLists()
 	}
 	s_open.clear();
 	s_open.shrink_to_fit();
-	//clean up close list
+	// Clean up closed list.
 	for (auto nr : s_closed)
 	{
 		delete nr;
