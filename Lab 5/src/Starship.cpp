@@ -3,13 +3,12 @@
 #include "Util.h"
 #include "Game.h"
 
-
-Starship::Starship() : m_startPos( glm::vec2(300.0f, 500.0f) ),
-	m_maxSpeed(20.0f), m_turnRate(5.0f), m_accelerationRate(2.0f)
+Starship::Starship() : m_maxSpeed(20.0f),
+	m_turnRate(5.0f), m_accelerationRate(2.0f), m_startPos( glm::vec2(300.0f, 500.0f) )
 {
-	TextureManager::Instance().Load("../Assets/textures/megaman_small.png","mm");
+	TextureManager::Instance().Load("../Assets/textures/ncl_small.png","starship");
 
-	const auto size = TextureManager::Instance().GetTextureSize("mm");
+	const auto size = TextureManager::Instance().GetTextureSize("starship");
 	SetWidth(static_cast<int>(size.x));
 	SetHeight(static_cast<int>(size.y));
 	GetTransform()->position = m_startPos;
@@ -17,11 +16,11 @@ Starship::Starship() : m_startPos( glm::vec2(300.0f, 500.0f) ),
 	GetRigidBody()->acceleration = glm::vec2(0, 0);
 	GetRigidBody()->isColliding = false;
 	SetCurrentHeading(0.0f); // current facing angle
-	// New for Lab 3
-	SetLOSDistance(300.0f);
+	SetLOSDistance(400.0f);
 	SetWhiskerAngle(45.0f);
-
-	SetType(GameObjectType::SPACE_SHIP);
+	SetLOSColour(glm::vec4(1, 0, 0, 1)); // default LOS colour is Red
+	
+	SetType(GameObjectType::AGENT);
 }
 
 Starship::~Starship()
@@ -30,7 +29,11 @@ Starship::~Starship()
 void Starship::Draw()
 {
 	// draw the target
-	TextureManager::Instance().Draw("mm", GetTransform()->position, GetCurrentHeading(), 255, true);
+	TextureManager::Instance().Draw("starship", GetTransform()->position, GetCurrentHeading(), 255, true);
+
+	// draw LOS
+	Util::DrawLine(GetTransform()->position + GetCurrentDirection() * 0.5f * static_cast<float>( GetWidth()), 
+		GetTransform()->position + GetCurrentDirection() * GetLOSDistance(), GetLOSColour());
 }
 
 void Starship::Update()
@@ -74,12 +77,12 @@ void Starship::SetTurnRate(float angle)
 	m_turnRate = angle;
 }
 
-void Starship::SetDesiredVelocity(glm::vec2 target_position)
+void Starship::SetDesiredVelocity(const glm::vec2 target_position)
 {
 	m_desiredVelocity = Util::Normalize(target_position - GetTransform()->position) * m_maxSpeed;
 }
 
-void Starship::SetAccelerationRate(float rate)
+void Starship::SetAccelerationRate(const float rate)
 {
 	m_accelerationRate = rate;
 }
@@ -95,16 +98,8 @@ void Starship::Seek()
 	GetRigidBody()->acceleration = GetCurrentDirection() * GetAccelerationRate();
 }
 
-void Starship::LookWhereIAmGoing(glm::vec2 target_direction)
+void Starship::LookWhereIAmGoing(const glm::vec2 target_direction)
 {
-	// Old version.
-	//const auto target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
-	//if (abs(target_rotation) > m_turnRate) // Do I still need to rotate?
-	//{
-	//	SetCurrentHeading(GetCurrentHeading() + GetTurnRate() * Util::Sign(target_rotation));
-	//}
-
-	// New for Lab 3 version 1. A bit jittery.
 	const auto target_rotation = Util::SignedAngle(GetCurrentDirection(), target_direction);
 	if (GetCollisionWhiskers()[0])
 	{
@@ -126,7 +121,7 @@ void Starship::Move()
 	Seek(); // Get our target for this frame.
 
 	// Kinematic equation: final_position = position + velocity * time + 0.5*acceleration * time*time
-	auto delta_time = Game::Instance().GetDeltaTime();
+	const auto delta_time = Game::Instance().GetDeltaTime();
 
 	// compute the position term
 	const glm::vec2 initial_position = GetTransform()->position;
