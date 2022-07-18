@@ -2,8 +2,8 @@
 
 #include "Util.h"
 
-Agent::Agent():m_currentHeading(0.0f), m_LOSDistance(0.0f),
-	m_hasLOS(false), m_whiskerAngle(0.0f)
+Agent::Agent() :m_currentHeading(0.0f), m_LOSDistance(0.0f),
+m_hasLOS(false), m_whiskerAngle(0.0f)
 { }
 
 Agent::~Agent()
@@ -88,6 +88,12 @@ void Agent::SetHasLOS(const bool state)
 {
 	m_hasLOS = state;
 	m_LOSColour = (m_hasLOS) ? glm::vec4(0, 1, 0, 1) : glm::vec4(1, 0, 0, 1);
+}
+
+void Agent::SetHasLOS(const bool state, glm::vec4 colour)
+{
+	m_hasLOS = state;
+	m_LOSColour = (m_hasLOS) ? colour : glm::vec4(1, 0, 0, 1);
 }
 
 void Agent::SetCurrentHeading(const float heading)

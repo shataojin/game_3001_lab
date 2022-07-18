@@ -257,6 +257,72 @@ void PlayScene::m_clearNodes()
 	}
 }
 
+bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object)
+{
+	bool has_LOS = false; // default - no LOS
+	agent->SetHasLOS(has_LOS);
+	glm::vec4 LOSColour;
+
+	// if ship to target distance is less than or equal to the LOS Distance (Range)
+	const auto agent_to_range = Util::GetClosestEdge(agent->GetTransform()->position, target_object);
+	if (agent_to_range <= agent->GetLOSDistance())
+	{
+		// we are in range
+		std::vector<DisplayObject*> contact_list;
+		for (auto display_object : GetDisplayList())
+		{
+			const auto agent_to_object_distance = Util::GetClosestEdge(agent->GetTransform()->position, display_object);
+			if (agent_to_object_distance > agent_to_range) { continue; } // target is out of range
+			if ((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
+			{
+				contact_list.push_back(display_object);
+			}
+		}
+
+		const glm::vec2 agent_LOS_end_point = agent->GetTransform()->position + agent->GetCurrentDirection() * agent->GetLOSDistance();
+		has_LOS = CollisionManager::LOSCheck(agent, agent_LOS_end_point, contact_list, target_object);
+
+		LOSColour = (target_object->GetType() == GameObjectType::AGENT) ? glm::vec4(0, 0, 1, 1) : glm::vec4(0, 1, 0, 1);
+		agent->SetHasLOS(has_LOS, LOSColour);
+	}
+	return has_LOS;
+}
+
+bool PlayScene::m_checkPathNodeLOS(PathNode* path_node, DisplayObject* target_object)
+{
+	// check angle to the target so we can still use LOS distance for path_nodes
+	const auto target_direction = target_object->GetTransform()->position - path_node->GetTransform()->position;
+	const auto normalized_direction = Util::Normalize(target_direction); // changes direction to a unit vector (length of 1)
+	path_node->SetCurrentDirection(normalized_direction);
+	return m_checkAgentLOS(path_node, target_object);
+}
+
+void PlayScene::m_checkAllNodesWithTarget(DisplayObject* target_object)
+{
+	for (const auto path_node : m_pGrid)
+	{
+		m_checkPathNodeLOS(path_node, target_object);
+	}
+}
+
+void PlayScene::m_checkAllNodesWithBoth()
+{
+	for (const auto path_node : m_pGrid)
+	{
+		const bool LOSWithStarShip = m_checkPathNodeLOS(path_node, m_pStarship);
+		const bool LOSWithTarget = m_checkPathNodeLOS(path_node, m_pTarget);
+		path_node->SetHasLOS(LOSWithStarShip && LOSWithTarget, glm::vec4(0, 1, 1, 1));
+	}
+}
+
+void PlayScene::m_setPathNodeLOSDistance(const int dist)
+{
+	for (const auto path_node : m_pGrid)
+	{
+		path_node->SetLOSDistance(static_cast<float>(dist));
+	}
+}
+
 
 void PlayScene::Start()
 {

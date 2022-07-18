@@ -7,7 +7,7 @@
 #include "PathNode.h"
 #include "Starship.h"
 #include "Target.h"
-
+#include "LOSMode.h"
 
 class PlayScene : public Scene
 {
@@ -43,8 +43,16 @@ private:
 	std::vector<PathNode*> m_pGrid;
 	void m_buildGrid();
 	void m_toggleGrid(bool state);
-	void m_checkShipLOS(DisplayObject* target_object) const;
+
+	bool m_checkAgentLOS(Agent* agent, DisplayObject* target_object);
+	bool m_checkPathNodeLOS(PathNode* path_node, DisplayObject* target_object);
+	void m_checkAllNodesWithTarget(DisplayObject* target_object);
+	void m_checkAllNodesWithBoth();
+	void m_setPathNodeLOSDistance(int dist);
+	LOSMode m_LOSMode{};
+
 	void m_clearNodes();
+	int m_pathNodeLOSDistance;
 };
 
 #endif /* defined (__PLAY_SCENE__) */
