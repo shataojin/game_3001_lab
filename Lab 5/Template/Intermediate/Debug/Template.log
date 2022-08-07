@@ -1,6 +1,1 @@
-﻿  PlayScene.cpp
-C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(237,66): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(237,47): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(248,63): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\src\PlayScene.cpp(248,45): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
-  Template.vcxproj -> C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\bin\Debug\Template.exe
+﻿  Template.vcxproj -> C:\Users\Administrator\Desktop\code\game_3001_lab\Lab 5\bin\Debug\Template.exe
