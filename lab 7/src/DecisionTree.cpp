@@ -27,7 +27,7 @@ Agent* DecisionTree::GetAgent() const
 	return m_agent;
 }
 
-void DecisionTree::SetAgent(Agent * agent)
+void DecisionTree::SetAgent(Agent* agent)
 {
 	m_agent = agent;
 }
@@ -52,7 +52,7 @@ RangedCombatCondition* DecisionTree::GetRangedCombatNode() const
 	return m_RangedCombatNode;
 }
 
-void DecisionTree::SetRangedCombatNode(RangedCombatCondition * node)
+void DecisionTree::SetRangedCombatNode(RangedCombatCondition* node)
 {
 	m_RangedCombatNode = node;
 }
@@ -62,22 +62,22 @@ std::vector<TreeNode*>& DecisionTree::GetTree()
 	return m_treeNodeList;
 }
 
-void DecisionTree::SetLOSNode(LOSCondition * node)
+void DecisionTree::SetLOSNode(LOSCondition* node)
 {
 	m_LOSNode = node;
 }
 
-void DecisionTree::SetRadiusNode(RadiusCondition * node)
+void DecisionTree::SetRadiusNode(RadiusCondition* node)
 {
 	m_RadiusNode = node;
 }
 
-void DecisionTree::SetCloseCombatNode(CloseCombatCondition * node)
+void DecisionTree::SetCloseCombatNode(CloseCombatCondition* node)
 {
 	m_CloseCombatNode = node;
 }
 
-TreeNode* DecisionTree::AddNode(TreeNode * parent, TreeNode * child_node, const TreeNodeType type)
+TreeNode* DecisionTree::AddNode(TreeNode* parent, TreeNode* child_node, const TreeNodeType type)
 {
 	switch (type)
 	{
@@ -129,10 +129,10 @@ void DecisionTree::MakeDecision() const
 	TreeNode* current_node = m_treeNodeList[0]; // root node;
 
 	// Traverse Tree down to through each Decision
-	while (!current_node->m_isLeaf)
+	while(!current_node->m_isLeaf)
 	{
-		current_node = dynamic_cast<ConditionNode*>(current_node)->Condition() ?
-			(current_node->m_pRight) : (current_node->m_pLeft);
+		current_node = dynamic_cast<ConditionNode*>(current_node)->Condition() ? 
+			               (current_node->m_pRight) : (current_node->m_pLeft);
 	}
 	// Take Action
 	dynamic_cast<ActionNode*>(current_node)->Action();
