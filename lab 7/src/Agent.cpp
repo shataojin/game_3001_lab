@@ -76,6 +76,21 @@ ActionState Agent::GetActionState() const
 	return m_state;
 }
 
+int Agent::GetHealth() const
+{
+	return m_health;
+}
+
+void Agent::SetHealth(const int value)
+{
+	m_health = value;
+}
+
+void Agent::TakeDamage(const int value)
+{
+	m_health -= value;
+}
+
 void Agent::SetTargetPosition(const glm::vec2 new_position)
 {
 	m_targetPosition = new_position;
@@ -184,7 +199,7 @@ bool Agent::CheckAgentLOSToTarget(Agent* agent, DisplayObject* target_object, co
 
 		has_LOS = CollisionManager::LOSCheck(agent, GetMiddleLOSEndPoint(), contact_list, target_object);
 	}
-	SetHasLOS(has_LOS);
+	agent->SetHasLOS(has_LOS);
 
 	return has_LOS;
 }

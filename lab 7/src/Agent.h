@@ -65,7 +65,7 @@ public:
 	// Utility function
 	bool CheckAgentLOSToTarget(Agent* agent, DisplayObject* target_object, const std::vector<Obstacle*>& obstacles);
 	// Virtual functions
-	virtual void Attack() {}
+	virtual void Attack(){}
 	virtual void MoveToLOS() {}
 	virtual void MoveToPlayer() {}
 	virtual void MoveToRange() {}
