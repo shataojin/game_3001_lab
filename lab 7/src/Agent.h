@@ -36,6 +36,11 @@ public:
 
 	ActionState GetActionState() const;
 
+	// New For Lab 7 Part 3
+	int GetHealth() const;
+	void SetHealth(int value);
+	void TakeDamage(int value);
+
 	// setters
 	void SetTargetPosition(glm::vec2 new_position);
 	void SetCurrentDirection(glm::vec2 new_direction);
@@ -60,11 +65,15 @@ public:
 	// Utility function
 	bool CheckAgentLOSToTarget(Agent* agent, DisplayObject* target_object, const std::vector<Obstacle*>& obstacles);
 	// Virtual functions
-	virtual void Attack(){}
+	virtual void Attack() {}
 	virtual void MoveToLOS() {}
 	virtual void MoveToPlayer() {}
 	virtual void MoveToRange() {}
 	virtual void Patrol() {}
+	// new for Lab 7 part 3
+	virtual void Flee() {}
+	virtual void MoveToCover() {}
+	virtual void WaitBehindCover() {}
 
 private:
 	void ChangeDirection(); // From scalar to vec2.
@@ -88,6 +97,9 @@ private:
 
 	// action state
 	ActionState m_state;
+
+	// New For Lab 7 part 3
+	int m_health = 100;
 };
 
 
