@@ -180,6 +180,7 @@
     <ClCompile Include="..\src\ImGuiWindowFrame.cpp" />
     <ClCompile Include="..\src\LOSCondition.cpp" />
     <ClCompile Include="..\src\Megaman.cpp" />
+    <ClCompile Include="..\src\MoveToCoverAction.cpp" />
     <ClCompile Include="..\src\MoveToLOSAction.cpp" />
     <ClCompile Include="..\src\MoveToPlayerAction.cpp" />
     <ClCompile Include="..\src\MoveToRangeAction.cpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="..\src\PathConnection.cpp" />
     <ClCompile Include="..\src\PathNode.cpp" />
     <ClCompile Include="..\src\PatrolAction.cpp" />
+    <ClCompile Include="..\src\PlayerDetectedCondition.cpp" />
     <ClCompile Include="..\src\RadiusCondition.cpp" />
     <ClCompile Include="..\src\RangedCombatCondition.cpp" />
     <ClCompile Include="..\src\RangedCombatEnemy.cpp" />
@@ -215,6 +217,7 @@
     <ClCompile Include="..\src\Target.cpp" />
     <ClCompile Include="..\src\TextureManager.cpp" />
     <ClCompile Include="..\src\Util.cpp" />
+    <ClCompile Include="..\src\WaitBehindCoverAction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\IMGUI\imconfig.h" />
@@ -247,6 +250,7 @@
     <ClInclude Include="..\src\LOSCondition.h" />
     <ClInclude Include="..\src\LOSMode.h" />
     <ClInclude Include="..\src\Megaman.h" />
+    <ClInclude Include="..\src\MoveToCoverAction.h" />
     <ClInclude Include="..\src\MoveToLOSAction.h" />
     <ClInclude Include="..\src\MoveToPlayerAction.h" />
     <ClInclude Include="..\src\MoveToRangeAction.h" />
@@ -256,6 +260,7 @@
     <ClInclude Include="..\src\PathConnection.h" />
     <ClInclude Include="..\src\PathNode.h" />
     <ClInclude Include="..\src\PatrolAction.h" />
+    <ClInclude Include="..\src\PlayerDetectedCondition.h" />
     <ClInclude Include="..\src\RadiusCondition.h" />
     <ClInclude Include="..\src\RangedCombatCondition.h" />
     <ClInclude Include="..\src\RangedCombatEnemy.h" />
@@ -297,6 +302,7 @@
     <ClInclude Include="..\src\TextureManager.h" />
     <ClInclude Include="..\src\Transform.h" />
     <ClInclude Include="..\src\Util.h" />
+    <ClInclude Include="..\src\WaitBehindCoverAction.h" />
     <ClInclude Include="..\src\WindowName.h" />
   </ItemGroup>
   <ItemGroup>
