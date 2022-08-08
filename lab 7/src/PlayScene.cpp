@@ -42,22 +42,22 @@ void PlayScene::Draw()
 void PlayScene::Update()
 {
 	UpdateDisplayList();
-	m_checkAgentLOS(m_pStarship, m_pTarget);
+
+	m_pStarShip->GetTree()->GetLOSNode()->SetLOS(m_pStarShip->CheckAgentLOSToTarget(m_pStarShip, m_pTarget, m_pObstacles));
+
 	switch (m_LOSMode)
 	{
 	case LOSMode::TARGET:
 		m_checkAllNodesWithTarget(m_pTarget);
 		break;
 	case LOSMode::SHIP:
-		m_checkAllNodesWithTarget(m_pStarship);
+		m_checkAllNodesWithTarget(m_pStarShip);
 		break;
 	case LOSMode::BOTH:
 		m_checkAllNodesWithBoth();
 		break;
 	}
 
-	// Make a Decision
-	m_decisionTree->MakeDecision();
 }
 
 void PlayScene::Clean()
@@ -251,7 +251,6 @@ bool PlayScene::m_checkAgentLOS(Agent * agent, DisplayObject * target_object) co
 {
 	bool has_LOS = false; // default - no LOS
 	agent->SetHasLOS(has_LOS);
-	glm::vec4 LOSColour;
 
 	// if ship to target distance is less than or equal to the LOS Distance (Range)
 	const auto agent_to_range = Util::GetClosestEdge(agent->GetTransform()->position, target_object);
@@ -261,6 +260,8 @@ bool PlayScene::m_checkAgentLOS(Agent * agent, DisplayObject * target_object) co
 		std::vector<DisplayObject*> contact_list;
 		for (auto display_object : GetDisplayList())
 		{
+			if (display_object->GetType() == GameObjectType::NONE) { continue; }
+
 			const auto agent_to_object_distance = Util::GetClosestEdge(agent->GetTransform()->position, display_object);
 			if (agent_to_object_distance > agent_to_range) { continue; } // target is out of range
 			if ((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
@@ -272,9 +273,9 @@ bool PlayScene::m_checkAgentLOS(Agent * agent, DisplayObject * target_object) co
 		const glm::vec2 agent_LOS_end_point = agent->GetTransform()->position + agent->GetCurrentDirection() * agent->GetLOSDistance();
 		has_LOS = CollisionManager::LOSCheck(agent, agent_LOS_end_point, contact_list, target_object);
 
-		LOSColour = (target_object->GetType() == GameObjectType::AGENT) ? glm::vec4(0, 0, 1, 1) : glm::vec4(0, 1, 0, 1);
-		agent->SetHasLOS(has_LOS, LOSColour);
 	}
+	agent->SetHasLOS(has_LOS);
+
 	return has_LOS;
 }
 
@@ -299,7 +300,7 @@ void PlayScene::m_checkAllNodesWithBoth() const
 {
 	for (const auto path_node : m_pGrid)
 	{
-		const bool LOSWithStarShip = m_checkPathNodeLOS(path_node, m_pStarship);
+		const bool LOSWithStarShip = m_checkPathNodeLOS(path_node, m_pStarShip);
 		const bool LOSWithTarget = m_checkPathNodeLOS(path_node, m_pTarget);
 		path_node->SetHasLOS(LOSWithStarShip && LOSWithTarget, glm::vec4(0, 1, 1, 1));
 	}
@@ -328,7 +329,7 @@ void PlayScene::m_clearNodes()
 void PlayScene::Start()
 {
 	// Set GUI Title
-	m_guiTitle = "Lab 7 - Part 1";
+	m_guiTitle = "Lab 7 - Part 2";
 
 	// Setup a few more fields
 	m_LOSMode = LOSMode::TARGET;
@@ -346,9 +347,10 @@ void PlayScene::Start()
 	m_pTarget->GetTransform()->position = glm::vec2(500.0f, 300.0f);
 	AddChild(m_pTarget, 3);
 
-	m_pStarship = new Starship();
-	m_pStarship->GetTransform()->position = glm::vec2(400.0f, 40.0f);
-	AddChild(m_pStarship, 4);
+	m_pStarShip = new CloseCombatEnemy();
+	//m_pStarShip = new RangedCombatEnemy();
+	m_pStarShip->GetTransform()->position = glm::vec2(400.0f, 40.0f);
+	AddChild(m_pStarShip, 4);
 
 	// Add Obstacles
 	BuildObstaclePool();
@@ -358,21 +360,16 @@ void PlayScene::Start()
 	m_buildGrid();
 	m_toggleGrid(m_isGridEnabled);
 
-	// Create Decision Tree
-	m_decisionTree = new DecisionTree(m_pStarship); // using our overloaded constructor
-	m_decisionTree->Display(); // optional
-	m_decisionTree->MakeDecision(); // Patrol
-
 	// Pre-load sounds
 	SoundManager::Instance().Load("../Assets/audio/yay.ogg", "yay", SoundType::SOUND_SFX);
 	SoundManager::Instance().Load("../Assets/audio/thunder.ogg", "thunder", SoundType::SOUND_SFX);
 
 	// Pre-load Music
-	SoundManager::Instance().Load("../Assets/audio/mutara.mp3", "mutara", SoundType::SOUND_MUSIC);
+	SoundManager::Instance().Load("../Assets/audio/Klingon.mp3", "klingon", SoundType::SOUND_MUSIC);
 	SoundManager::Instance().SetMusicVolume(16);
 
 	// Play Music
-	SoundManager::Instance().PlayMusic("mutara");
+	SoundManager::Instance().PlayMusic("klingon");
 
 	/* DO NOT REMOVE */
 	ImGuiWindowFrame::Instance().SetGuiFunction([this] { GUI_Function(); });
@@ -422,18 +419,18 @@ void PlayScene::GUI_Function()
 
 	// spaceship properties
 
-	static int shipPosition[] = { static_cast<int>(m_pStarship->GetTransform()->position.x), static_cast<int>(m_pStarship->GetTransform()->position.y) };
+	static int shipPosition[] = { static_cast<int>(m_pStarShip->GetTransform()->position.x), static_cast<int>(m_pStarShip->GetTransform()->position.y) };
 	if (ImGui::SliderInt2("Ship Position", shipPosition, 0, 800))
 	{
-		m_pStarship->GetTransform()->position.x = static_cast<float>(shipPosition[0]);
-		m_pStarship->GetTransform()->position.y = static_cast<float>(shipPosition[1]);
+		m_pStarShip->GetTransform()->position.x = static_cast<float>(shipPosition[0]);
+		m_pStarShip->GetTransform()->position.y = static_cast<float>(shipPosition[1]);
 	}
 
 	// allow the ship to rotate
 	static int angle;
 	if (ImGui::SliderInt("Ship Direction", &angle, -360, 360))
 	{
-		m_pStarship->SetCurrentHeading(static_cast<float>(angle));
+		m_pStarShip->SetCurrentHeading(static_cast<float>(angle));
 	}
 
 	// Target properties
