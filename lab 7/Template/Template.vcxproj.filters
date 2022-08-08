@@ -213,6 +213,12 @@
     <ClCompile Include="..\src\FleeAction.cpp">
       <Filter>Decision\Actions</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\EnemyHealthCondition.cpp">
+      <Filter>Decision\Conditions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\EnemyHitCondition.cpp">
+      <Filter>Decision\Conditions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\StartScene.h">
@@ -451,6 +457,12 @@
     </ClInclude>
     <ClInclude Include="..\src\FleeAction.h">
       <Filter>Decision\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\EnemyHealthCondition.h">
+      <Filter>Decision\Conditions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\EnemyHitCondition.h">
+      <Filter>Decision\Conditions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
