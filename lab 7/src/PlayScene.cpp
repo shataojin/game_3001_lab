@@ -26,7 +26,7 @@ void PlayScene::Draw()
 {
 	DrawDisplayList();
 
-	if(m_isGridEnabled)
+	if (m_isGridEnabled)
 	{
 		// draws the collision bounds of each obstacle
 		for (const auto obstacle : m_pObstacles)
@@ -43,18 +43,21 @@ void PlayScene::Update()
 {
 	UpdateDisplayList();
 	m_checkAgentLOS(m_pStarship, m_pTarget);
-	switch(m_LOSMode)
+	switch (m_LOSMode)
 	{
 	case LOSMode::TARGET:
 		m_checkAllNodesWithTarget(m_pTarget);
 		break;
 	case LOSMode::SHIP:
-		m_checkAllNodesWithTarget(m_pStarship); 
+		m_checkAllNodesWithTarget(m_pStarship);
 		break;
 	case LOSMode::BOTH:
-		m_checkAllNodesWithBoth(); 
+		m_checkAllNodesWithBoth();
 		break;
 	}
+
+	// Make a Decision
+	m_decisionTree->MakeDecision();
 }
 
 void PlayScene::Clean()
@@ -86,15 +89,15 @@ void PlayScene::GetPlayerInput()
 				constexpr auto dead_zone = 10000;
 				if (EventManager::Instance().GetGameController(0)->STICK_LEFT_HORIZONTAL > dead_zone)
 				{
-					
+
 				}
 				else if (EventManager::Instance().GetGameController(0)->STICK_LEFT_HORIZONTAL < -dead_zone)
 				{
-					
+
 				}
 				else
 				{
-					
+
 				}
 			}
 		}
@@ -105,15 +108,15 @@ void PlayScene::GetPlayerInput()
 		// handle player movement with mouse and keyboard
 		if (EventManager::Instance().IsKeyDown(SDL_SCANCODE_A))
 		{
-			
+
 		}
 		else if (EventManager::Instance().IsKeyDown(SDL_SCANCODE_D))
 		{
-			
+
 		}
 		else
 		{
-			
+
 		}
 	}
 	break;
@@ -127,30 +130,30 @@ void PlayScene::GetPlayerInput()
 				if (EventManager::Instance().GetGameController(0)->STICK_LEFT_HORIZONTAL > dead_zone
 					|| EventManager::Instance().IsKeyDown(SDL_SCANCODE_D))
 				{
-					
+
 				}
 				else if (EventManager::Instance().GetGameController(0)->STICK_LEFT_HORIZONTAL < -dead_zone
 					|| EventManager::Instance().IsKeyDown(SDL_SCANCODE_A))
 				{
-					
+
 				}
 				else
 				{
-					
+
 				}
 			}
 		}
 		else if (EventManager::Instance().IsKeyDown(SDL_SCANCODE_A))
 		{
-			
+
 		}
 		else if (EventManager::Instance().IsKeyDown(SDL_SCANCODE_D))
 		{
-			
+
 		}
 		else
 		{
-			
+
 		}
 	}
 	break;
@@ -179,7 +182,7 @@ void PlayScene::BuildObstaclePool()
 {
 	std::ifstream inFile("../Assets/data/obstacles.txt");
 
-	while(!inFile.eof())
+	while (!inFile.eof())
 	{
 		std::cout << "Obstacle" << std::endl;
 		auto obstacle = new Obstacle();
@@ -207,14 +210,14 @@ void PlayScene::m_buildGrid()
 		for (int col = 0; col < Config::COL_NUM; ++col)
 		{
 			PathNode* path_node = new PathNode();
-			path_node->GetTransform()->position = 
+			path_node->GetTransform()->position =
 				glm::vec2(static_cast<float>(col) * tile_size + offset.x, static_cast<float>(row) * tile_size + offset.y);
 
 			bool keep_node = true;
 			for (auto obstacle : m_pObstacles)
 			{
 				// determine which path_nodes are inside the obstacles
-				if(CollisionManager::AABBCheck(path_node, obstacle))
+				if (CollisionManager::AABBCheck(path_node, obstacle))
 				{
 					keep_node = false;
 				}
@@ -244,7 +247,7 @@ void PlayScene::m_toggleGrid(const bool state) const
 	}
 }
 
-bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object) const
+bool PlayScene::m_checkAgentLOS(Agent * agent, DisplayObject * target_object) const
 {
 	bool has_LOS = false; // default - no LOS
 	agent->SetHasLOS(has_LOS);
@@ -260,7 +263,7 @@ bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object) cons
 		{
 			const auto agent_to_object_distance = Util::GetClosestEdge(agent->GetTransform()->position, display_object);
 			if (agent_to_object_distance > agent_to_range) { continue; } // target is out of range
-			if((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
+			if ((display_object->GetType() != GameObjectType::AGENT) && (display_object->GetType() != GameObjectType::PATH_NODE) && (display_object->GetType() != GameObjectType::TARGET))
 			{
 				contact_list.push_back(display_object);
 			}
@@ -275,7 +278,7 @@ bool PlayScene::m_checkAgentLOS(Agent* agent, DisplayObject* target_object) cons
 	return has_LOS;
 }
 
-bool PlayScene::m_checkPathNodeLOS(PathNode* path_node, DisplayObject* target_object) const
+bool PlayScene::m_checkPathNodeLOS(PathNode * path_node, DisplayObject * target_object) const
 {
 	// check angle to the target so we can still use LOS distance for path_nodes
 	const auto target_direction = target_object->GetTransform()->position - path_node->GetTransform()->position;
@@ -284,7 +287,7 @@ bool PlayScene::m_checkPathNodeLOS(PathNode* path_node, DisplayObject* target_ob
 	return m_checkAgentLOS(path_node, target_object);
 }
 
-void PlayScene::m_checkAllNodesWithTarget(DisplayObject* target_object) const
+void PlayScene::m_checkAllNodesWithTarget(DisplayObject * target_object) const
 {
 	for (const auto path_node : m_pGrid)
 	{
@@ -315,7 +318,7 @@ void PlayScene::m_clearNodes()
 	m_pGrid.clear();
 	for (const auto display_object : GetDisplayList())
 	{
-		if(display_object->GetType() == GameObjectType::PATH_NODE)
+		if (display_object->GetType() == GameObjectType::PATH_NODE)
 		{
 			RemoveChild(display_object);
 		}
@@ -355,7 +358,10 @@ void PlayScene::Start()
 	m_buildGrid();
 	m_toggleGrid(m_isGridEnabled);
 
-	// TODO: Create Decision Tree Here
+	// Create Decision Tree
+	m_decisionTree = new DecisionTree(m_pStarship); // using our overloaded constructor
+	m_decisionTree->Display(); // optional
+	m_decisionTree->MakeDecision(); // Patrol
 
 	// Pre-load sounds
 	SoundManager::Instance().Load("../Assets/audio/yay.ogg", "yay", SoundType::SOUND_SFX);
@@ -401,13 +407,13 @@ void PlayScene::GUI_Function()
 	ImGui::Text("Path Node LOS");
 	ImGui::RadioButton("Target", &LOS_mode, static_cast<int>(LOSMode::TARGET)); ImGui::SameLine();
 	ImGui::RadioButton("StarShip", &LOS_mode, static_cast<int>(LOSMode::SHIP)); ImGui::SameLine();
-	ImGui::RadioButton("Both Target & StarShip", &LOS_mode, static_cast<int>(LOSMode::BOTH)); 
-	
+	ImGui::RadioButton("Both Target & StarShip", &LOS_mode, static_cast<int>(LOSMode::BOTH));
+
 	m_LOSMode = static_cast<LOSMode>(LOS_mode);
 
 	ImGui::Separator();
 
-	if(ImGui::SliderInt("Path Node LOS Distance", &m_pathNodeLOSDistance, 0, 1000))
+	if (ImGui::SliderInt("Path Node LOS Distance", &m_pathNodeLOSDistance, 0, 1000))
 	{
 		m_setPathNodeLOSDistance(m_pathNodeLOSDistance);
 	}
@@ -416,7 +422,7 @@ void PlayScene::GUI_Function()
 
 	// spaceship properties
 
-	static int shipPosition[] = { static_cast<int>(m_pStarship->GetTransform()->position.x), static_cast<int>(m_pStarship->GetTransform()->position.y)};
+	static int shipPosition[] = { static_cast<int>(m_pStarship->GetTransform()->position.x), static_cast<int>(m_pStarship->GetTransform()->position.y) };
 	if (ImGui::SliderInt2("Ship Position", shipPosition, 0, 800))
 	{
 		m_pStarship->GetTransform()->position.x = static_cast<float>(shipPosition[0]);
@@ -432,7 +438,7 @@ void PlayScene::GUI_Function()
 
 	// Target properties
 
-	static int targetPosition[] = { static_cast<int>( m_pTarget->GetTransform()->position.x), static_cast<int>(m_pTarget->GetTransform()->position.y) };
+	static int targetPosition[] = { static_cast<int>(m_pTarget->GetTransform()->position.x), static_cast<int>(m_pTarget->GetTransform()->position.y) };
 	if (ImGui::SliderInt2("Target Position", targetPosition, 0, 800))
 	{
 		m_pTarget->GetTransform()->position.x = static_cast<float>(targetPosition[0]);
@@ -456,6 +462,6 @@ void PlayScene::GUI_Function()
 
 	ImGui::Separator();
 
-	
+
 	ImGui::End();
 }
