@@ -10,7 +10,7 @@
 #include "LOSMode.h"
 #include "CloseCombatEnemy.h"
 #include "RangedCombatEnemy.h"
-
+#include "Torpedo.h"
 class PlayScene : public Scene
 {
 public:
@@ -43,6 +43,11 @@ private:
 	// New for Lab 7 Part 2
 	//CloseCombatEnemy* m_pStarShip;
 	RangedCombatEnemy* m_pStarShip;
+
+
+	//New for Lab 8
+	std::vector<Torpedo*> m_pTorpedoes;
+
 
 	std::vector<Obstacle*> m_pObstacles;
 
