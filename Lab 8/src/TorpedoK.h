@@ -3,10 +3,10 @@
 #define __TORPEDO_K__
 
 #include "TorpedoAnimationState.h"
-#include "Sprite.h"
+#include "Torpedobase.h"
 
 
-class TorpedoK final : public Sprite
+class TorpedoK final : public Torpedobase
 {
 public:
 	TorpedoK(float speed = 0.0f, glm::vec2 direction = {0, 0});
